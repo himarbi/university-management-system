@@ -81,7 +81,7 @@ university-management-system/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── AnnouncementsWidget.jsx      # Broadcast feed
-│   │   │   └── DashboardLayout.jsx          # Dedicated Sidebar Navigation
+│   │   │   └── DashboardLayout.jsx          # Dedicated Sidebar Navigation (Collapsible)
 │   │   ├── pages/
 │   │   │   ├── AttendanceManager.jsx        # Dedicated Attendance Page
 │   │   │   ├── CourseCatalog.jsx            # Course Catalog Page
@@ -123,15 +123,32 @@ npm run dev
 
 ---
 
-## 🔑 Pre-Seeded Somali Test Credentials
+## 🔑 Pre-Seeded Somali Demo User Handles
 
-| Username | Password | Role | User Description |
+### 👑 System Administrators (`password: admin123`)
+| Username | Email | Role | Access Rights |
 | :--- | :--- | :--- | :--- |
-| `admin` | `admin123` | `ROLE_ADMIN` | System Administrator (`abdirahman@university.edu.so`) |
-| `ibrahim_ahmed` | `teacher123` | `ROLE_TEACHER` | Prof. Ibrahim A. Ahmed (Computer Science Department) |
-| `fatima_jama` | `teacher123` | `ROLE_TEACHER` | Dr. Fatima Abdi Jama (Mathematics Department) |
-| `hamda_farah` | `student123` | `ROLE_STUDENT` | Hamda Farah Abdi (Senior Student - High Honors) |
-| `bilal_warsame` | `student123` | `ROLE_STUDENT` | Bilal Ahmed Warsame (Junior Student) |
+| `admin` | `abdirahman@university.edu.so` | `ROLE_ADMIN` | System Analytics, Billing Generation, User Directory & Announcements |
+| `khadra_gure` | `khadra.gure@university.edu.so` | `ROLE_ADMIN` | Full System Oversight & Course Management |
+
+### 👩‍🏫 Faculty Professors (`password: teacher123`)
+| Username | Email | Department | Taught Courses |
+| :--- | :--- | :--- | :--- |
+| `ibrahim_ahmed` | `ibrahim.ahmed@university.edu.so` | Computer Science | `CS-101`, `CS-402` |
+| `fatima_jama` | `fatima.jama@university.edu.so` | Mathematics | `MATH-201` |
+| `mohamed_hassan` | `mohamed.hassan@university.edu.so` | Software Engineering | `SWE-310` |
+| `amina_yusuf` | `amina.yusuf@university.edu.so` | Electrical Engineering | `EE-220` |
+| `hassan_abdi` | `hassan.abdi@university.edu.so` | Business Administration | `BUS-110` |
+
+### 🎓 Students (`password: student123`)
+| Username | Email | Academic Standing | Enrolled Courses |
+| :--- | :--- | :--- | :--- |
+| `hamda_farah` | `hamda.farah@university.edu.so` | **Summa Cum Laude (GPA 3.90)** | `CS-101`, `MATH-201`, `SWE-310`, `CS-402` |
+| `bilal_warsame` | `bilal.warsame@university.edu.so` | Good Standing (GPA 3.15) | `CS-101`, `MATH-201`, `EE-220`, `BUS-110` |
+| `zakaria_aden` | `zakaria.aden@university.edu.so` | Magna Cum Laude (GPA 3.70) | `CS-101`, `SWE-310`, `CS-402` |
+| `hawa_dahir` | `hawa.dahir@university.edu.so` | High Honors (GPA 4.00) | `MATH-201`, `SWE-310`, `EE-220` |
+| `mustafa_shire` | `mustafa.shire@university.edu.so` | Sophomore Student | `CS-101`, `EE-220`, `BUS-110` |
+| `nimo_osman` | `nimo.osman@university.edu.so` | Senior Student | `MATH-201`, `SWE-310`, `CS-402`, `BUS-110` |
 
 ---
 

@@ -58,4 +58,16 @@ export const analyticsApi = {
   getSummary: () => api.get('/analytics/summary'),
 };
 
+export const gradeApi = {
+  getTranscript: (studentId) => api.get(`/grades/transcript${studentId ? `?studentId=${studentId}` : ''}`),
+  getCourseGrades: (courseId) => api.get(`/grades/course/${courseId}`),
+  submitGrade: (data) => api.post('/grades/submit', data),
+};
+
+export const announcementApi = {
+  getAll: () => api.get('/announcements'),
+  create: (data) => api.post('/announcements', data),
+  delete: (id) => api.delete(`/announcements/${id}`),
+};
+
 export default api;

@@ -1,15 +1,16 @@
 package com.university.management;
 
-import com.university.management.model.Course;
-import com.university.management.model.Role;
-import com.university.management.model.User;
+import com.university.management.model.*;
+import com.university.management.repository.AnnouncementRepository;
 import com.university.management.repository.CourseRepository;
+import com.university.management.repository.GradeRepository;
 import com.university.management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,6 +22,12 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    private GradeRepository gradeRepository;
+
+    @Autowired
+    private AnnouncementRepository announcementRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -109,6 +116,56 @@ public class DataInitializer implements CommandLineRunner {
                     .students(new HashSet<>())
                     .build();
             courseRepository.save(course3);
+
+            // Create Initial Grades
+            Grade grade1 = Grade.builder()
+                    .student(student1)
+                    .course(course1)
+                    .letterGrade("A")
+                    .numericalScore(94.5)
+                    .gpaPoint(4.0)
+                    .remarks("Outstanding academic performance and project execution.")
+                    .build();
+            gradeRepository.save(grade1);
+
+            Grade grade2 = Grade.builder()
+                    .student(student1)
+                    .course(course2)
+                    .letterGrade("A-")
+                    .numericalScore(89.0)
+                    .gpaPoint(3.7)
+                    .remarks("Great problem solving skills in midterms and finals.")
+                    .build();
+            gradeRepository.save(grade2);
+
+            Grade grade3 = Grade.builder()
+                    .student(student2)
+                    .course(course2)
+                    .letterGrade("B+")
+                    .numericalScore(86.5)
+                    .gpaPoint(3.3)
+                    .remarks("Solid coursework and active tutorial participation.")
+                    .build();
+            gradeRepository.save(grade3);
+
+            // Create Initial Announcements
+            Announcement ann1 = Announcement.builder()
+                    .title("Welcome to Fall Academic Semester 2026")
+                    .content("Welcome all students and faculty! Course registration is now active. Please check your assigned schedules and department requirements.")
+                    .targetRole("ALL")
+                    .author(admin)
+                    .createdAt(LocalDateTime.now().minusDays(2))
+                    .build();
+                    announcementRepository.save(ann1);
+
+            Announcement ann2 = Announcement.builder()
+                    .title("Midterm Grade Submission Deadline")
+                    .content("All faculty members are requested to finalize midterm grade entries via the Faculty Grading Portal by next Friday.")
+                    .targetRole("TEACHER")
+                    .author(admin)
+                    .createdAt(LocalDateTime.now().minusDays(1))
+                    .build();
+                    announcementRepository.save(ann2);
 
             System.out.println("Data seeding complete!");
         } else {

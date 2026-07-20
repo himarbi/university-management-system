@@ -4,11 +4,14 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import DashboardLayout from './components/DashboardLayout';
 
-// Pages
+// Pages & Components
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
 import CourseCatalog from './pages/CourseCatalog';
+import StudentTranscript from './pages/StudentTranscript';
+import TeacherGradingPortal from './pages/TeacherGradingPortal';
+import AnnouncementsWidget from './components/AnnouncementsWidget';
 
 function App() {
   return (
@@ -49,8 +52,38 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/transcript"
+            element={
+              <PrivateRoute allowedRoles={['STUDENT', 'ADMIN']}>
+                <DashboardLayout>
+                  <StudentTranscript />
+                </DashboardLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/grading"
+            element={
+              <PrivateRoute allowedRoles={['TEACHER', 'ADMIN']}>
+                <DashboardLayout>
+                  <TeacherGradingPortal />
+                </DashboardLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/announcements"
+            element={
+              <PrivateRoute>
+                <DashboardLayout>
+                  <AnnouncementsWidget fullPage={true} />
+                </DashboardLayout>
+              </PrivateRoute>
+            }
+          />
 
-          {/* Redirect to dashboard */}
+          {/* Fallback Redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

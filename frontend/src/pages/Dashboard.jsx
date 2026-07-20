@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { courseApi, userApi, analyticsApi } from '../services/api';
+import AnnouncementsWidget from '../components/AnnouncementsWidget';
 import { 
   BookOpen, 
   Users, 
@@ -12,7 +13,9 @@ import {
   Search,
   BookMarked,
   BarChart3,
-  Percent
+  Percent,
+  Award,
+  Edit3
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -103,7 +106,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* System Analytics Progress Bar */}
           {analytics && (
             <div className="navy-card p-6 rounded-2xl space-y-3 shadow-sm bg-white border border-slate-200">
               <div className="flex justify-between items-center text-sm font-extrabold text-[#0f224a]">
@@ -228,9 +230,27 @@ const Dashboard = () => {
               Manage Users
             </Link>
           )}
+          {user?.role === 'STUDENT' && (
+            <Link 
+              to="/transcript"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-[#0f224a] text-sm font-bold shadow-md transition-all"
+            >
+              <Award className="h-4.5 w-4.5" />
+              View Transcript & GPA
+            </Link>
+          )}
+          {user?.role === 'TEACHER' && (
+            <Link 
+              to="/grading"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-[#0f224a] text-sm font-bold shadow-md transition-all"
+            >
+              <Edit3 className="h-4.5 w-4.5" />
+              Faculty Grading Portal
+            </Link>
+          )}
           <Link 
             to="/courses"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 border border-transparent text-[#0f224a] text-sm font-bold shadow-md transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-semibold transition-all"
           >
             <BookOpen className="h-4.5 w-4.5" />
             Explore Courses
@@ -246,7 +266,7 @@ const Dashboard = () => {
 
       {renderStats()}
 
-      {/* Grid: Course Listings & Quick Actions */}
+      {/* Grid: Course Listings & Quick Operations */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Main Section - Course lists */}
@@ -348,6 +368,9 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
+
+          {/* Campus Broadcast Feed Component */}
+          <AnnouncementsWidget />
         </div>
 
         {/* Sidebar Panel - Quick Operations */}
@@ -374,22 +397,40 @@ const Dashboard = () => {
                 </>
               )}
               {user?.role === 'STUDENT' && (
-                <button 
-                  onClick={() => navigate('/courses')}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
-                >
-                  <Search className="h-5 w-5 text-[#0f224a]" />
-                  <span>Browse Available Courses</span>
-                </button>
+                <>
+                  <button 
+                    onClick={() => navigate('/transcript')}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
+                  >
+                    <Award className="h-5 w-5 text-[#0f224a]" />
+                    <span>View Transcript & GPA</span>
+                  </button>
+                  <button 
+                    onClick={() => navigate('/courses')}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
+                  >
+                    <Search className="h-5 w-5 text-[#0f224a]" />
+                    <span>Browse Available Courses</span>
+                  </button>
+                </>
               )}
               {user?.role === 'TEACHER' && (
-                <button 
-                  onClick={() => navigate('/courses')}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
-                >
-                  <BookOpen className="h-5 w-5 text-[#0f224a]" />
-                  <span>Update Class Syllabus</span>
-                </button>
+                <>
+                  <button 
+                    onClick={() => navigate('/grading')}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
+                  >
+                    <Edit3 className="h-5 w-5 text-[#0f224a]" />
+                    <span>Faculty Grading Portal</span>
+                  </button>
+                  <button 
+                    onClick={() => navigate('/courses')}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
+                  >
+                    <BookOpen className="h-5 w-5 text-[#0f224a]" />
+                    <span>Update Class Syllabus</span>
+                  </button>
+                </>
               )}
             </div>
           </div>

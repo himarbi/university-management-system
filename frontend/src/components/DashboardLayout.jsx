@@ -10,7 +10,10 @@ import {
   X, 
   GraduationCap,
   ChevronRight,
-  User as UserIcon
+  User as UserIcon,
+  Award,
+  Edit3,
+  Megaphone
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
@@ -45,15 +48,33 @@ const DashboardLayout = ({ children }) => {
       roles: ['ADMIN', 'TEACHER', 'STUDENT']
     },
     {
-      name: 'User Management',
+      name: 'Course Catalog',
+      path: '/courses',
+      icon: BookOpen,
+      roles: ['ADMIN', 'TEACHER', 'STUDENT']
+    },
+    {
+      name: 'My Transcript & GPA',
+      path: '/transcript',
+      icon: Award,
+      roles: ['STUDENT']
+    },
+    {
+      name: 'Faculty Grading Portal',
+      path: '/grading',
+      icon: Edit3,
+      roles: ['TEACHER']
+    },
+    {
+      name: 'User Directory',
       path: '/users',
       icon: Users,
       roles: ['ADMIN']
     },
     {
-      name: 'Course Catalog',
-      path: '/courses',
-      icon: BookOpen,
+      name: 'Campus Broadcasts',
+      path: '/announcements',
+      icon: Megaphone,
       roles: ['ADMIN', 'TEACHER', 'STUDENT']
     }
   ];
@@ -62,7 +83,7 @@ const DashboardLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex overflow-hidden">
-      {/* Sidebar - Solid Deep Navy Blue */}
+      {/* Sidebar */}
       <aside 
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0f224a] text-white border-r border-blue-950 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col justify-between ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -147,7 +168,7 @@ const DashboardLayout = ({ children }) => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Navbar - Solid White */}
+        {/* Navbar */}
         <header className="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-6 z-40 shadow-sm">
           <div className="flex items-center gap-4">
             <button

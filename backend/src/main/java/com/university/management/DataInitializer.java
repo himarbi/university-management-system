@@ -1,15 +1,13 @@
 package com.university.management;
 
 import com.university.management.model.*;
-import com.university.management.repository.AnnouncementRepository;
-import com.university.management.repository.CourseRepository;
-import com.university.management.repository.GradeRepository;
-import com.university.management.repository.UserRepository;
+import com.university.management.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,6 +26,12 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private AnnouncementRepository announcementRepository;
+
+    @Autowired
+    private AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private FeeStatementRepository feeStatementRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -153,19 +157,78 @@ public class DataInitializer implements CommandLineRunner {
                     .title("Welcome to Fall Academic Semester 2026")
                     .content("Welcome all students and faculty! Course registration is now active. Please check your assigned schedules and department requirements.")
                     .targetRole("ALL")
+                    .priority("HIGH")
+                    .category("ACADEMIC")
                     .author(admin)
                     .createdAt(LocalDateTime.now().minusDays(2))
                     .build();
-                    announcementRepository.save(ann1);
+            announcementRepository.save(ann1);
 
             Announcement ann2 = Announcement.builder()
                     .title("Midterm Grade Submission Deadline")
                     .content("All faculty members are requested to finalize midterm grade entries via the Faculty Grading Portal by next Friday.")
                     .targetRole("TEACHER")
+                    .priority("URGENT")
+                    .category("EXAMS")
                     .author(admin)
                     .createdAt(LocalDateTime.now().minusDays(1))
                     .build();
-                    announcementRepository.save(ann2);
+            announcementRepository.save(ann2);
+
+            // Create Attendance Initial Data
+            Attendance att1 = Attendance.builder()
+                    .student(student1)
+                    .course(course1)
+                    .date(LocalDate.now().minusDays(3))
+                    .status("PRESENT")
+                    .remarks("On time")
+                    .build();
+            attendanceRepository.save(att1);
+
+            Attendance att2 = Attendance.builder()
+                    .student(student1)
+                    .course(course1)
+                    .date(LocalDate.now().minusDays(1))
+                    .status("PRESENT")
+                    .remarks("On time")
+                    .build();
+            attendanceRepository.save(att2);
+
+            Attendance att3 = Attendance.builder()
+                    .student(student2)
+                    .course(course2)
+                    .date(LocalDate.now().minusDays(2))
+                    .status("LATE")
+                    .remarks("Arrived 10 minutes late")
+                    .build();
+            attendanceRepository.save(att3);
+
+            // Create Fee Statement Initial Data
+            FeeStatement fee1 = FeeStatement.builder()
+                    .student(student1)
+                    .academicTerm("Fall 2026")
+                    .tuitionAmount(1400.0)
+                    .labFee(150.0)
+                    .registrationFee(100.0)
+                    .paidAmount(1650.0)
+                    .balance(0.0)
+                    .status("PAID")
+                    .dueDate(LocalDate.now().plusMonths(1))
+                    .build();
+            feeStatementRepository.save(fee1);
+
+            FeeStatement fee2 = FeeStatement.builder()
+                    .student(student2)
+                    .academicTerm("Fall 2026")
+                    .tuitionAmount(1200.0)
+                    .labFee(150.0)
+                    .registrationFee(100.0)
+                    .paidAmount(500.0)
+                    .balance(950.0)
+                    .status("PENDING")
+                    .dueDate(LocalDate.now().plusWeeks(2))
+                    .build();
+            feeStatementRepository.save(fee2);
 
             System.out.println("Data seeding complete!");
         } else {

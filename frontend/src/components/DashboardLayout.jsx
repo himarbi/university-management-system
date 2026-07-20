@@ -13,7 +13,9 @@ import {
   User as UserIcon,
   Award,
   Edit3,
-  Megaphone
+  Megaphone,
+  Calendar,
+  CreditCard
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
@@ -58,6 +60,18 @@ const DashboardLayout = ({ children }) => {
       path: '/transcript',
       icon: Award,
       roles: ['STUDENT']
+    },
+    {
+      name: 'Attendance Tracker',
+      path: '/attendance',
+      icon: Calendar,
+      roles: ['STUDENT', 'TEACHER', 'ADMIN']
+    },
+    {
+      name: 'Tuition & Fee Portal',
+      path: '/fees',
+      icon: CreditCard,
+      roles: ['STUDENT', 'ADMIN']
     },
     {
       name: 'Faculty Grading Portal',
@@ -114,7 +128,7 @@ const DashboardLayout = ({ children }) => {
           </div>
 
           {/* Nav Links */}
-          <nav className="p-4 space-y-1.5">
+          <nav className="p-4 space-y-1">
             {filteredMenuItems.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
@@ -122,19 +136,19 @@ const DashboardLayout = ({ children }) => {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all duration-200 group ${
                     isActive 
                       ? 'bg-white text-[#0f224a] font-bold shadow-md' 
                       : 'text-blue-100 hover:text-white hover:bg-blue-800/30'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`h-5 w-5 transition-transform duration-200 group-hover:scale-105 ${
+                    <Icon className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-105 ${
                       isActive ? 'text-[#0f224a]' : 'text-blue-200 group-hover:text-white'
                     }`} />
-                    <span className="text-sm">{item.name}</span>
+                    <span className="text-xs font-semibold">{item.name}</span>
                   </div>
-                  {isActive && <ChevronRight className="h-4 w-4 text-[#0f224a]" />}
+                  {isActive && <ChevronRight className="h-3.5 w-3.5 text-[#0f224a]" />}
                 </Link>
               );
             })}
@@ -143,24 +157,24 @@ const DashboardLayout = ({ children }) => {
 
         {/* User Info / Logout */}
         <div className="p-4 border-t border-blue-950 bg-[#0a1733]">
-          <div className="flex items-center gap-3 px-2 py-3 mb-3">
-            <div className="h-10 w-10 rounded-xl bg-blue-900/50 flex items-center justify-center text-white border border-blue-800">
-              <UserIcon className="h-5 w-5" />
+          <div className="flex items-center gap-3 px-2 py-2.5 mb-2">
+            <div className="h-9 w-9 rounded-xl bg-blue-900/50 flex items-center justify-center text-white border border-blue-800">
+              <UserIcon className="h-4.5 w-4.5" />
             </div>
             <div className="flex-1 overflow-hidden">
-              <h2 className="text-sm font-semibold truncate text-white">
+              <h2 className="text-xs font-semibold truncate text-white">
                 {user?.username}
               </h2>
-              <span className="inline-block px-2 py-0.5 mt-1 rounded text-[10px] font-bold tracking-wide uppercase bg-white/10 text-white border border-white/20">
+              <span className="inline-block px-2 py-0.5 mt-0.5 rounded text-[9px] font-bold tracking-wide uppercase bg-white/10 text-white border border-white/20">
                 {user?.role}
               </span>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold transition-all duration-250"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-all duration-250"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-3.5 w-3.5" />
             Logout
           </button>
         </div>

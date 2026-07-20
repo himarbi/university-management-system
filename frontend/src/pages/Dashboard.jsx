@@ -1,26 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { courseApi, userApi, analyticsApi } from '../services/api';
-import AnnouncementsWidget from '../components/AnnouncementsWidget';
 import { 
   BookOpen, 
   Users, 
-  UserCheck, 
   GraduationCap, 
   ArrowUpRight, 
-  Plus, 
-  Search,
   BookMarked,
   BarChart3,
-  Percent,
-  Award,
-  Edit3
+  Percent
 } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
   const [analytics, setAnalytics] = useState(null);
@@ -217,44 +210,8 @@ const Dashboard = () => {
             Dashboard Overview
           </h2>
           <p className="text-blue-100 text-sm max-w-xl">
-            Access, enroll, and manage courses, instructors, and student lists in a solid navy-and-white portal.
+            Welcome to the academic management portal. Use the sidebar menu to navigate to your dedicated modules.
           </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {user?.role === 'ADMIN' && (
-            <Link 
-              to="/users"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-semibold transition-all"
-            >
-              <Users className="h-4.5 w-4.5" />
-              Manage Users
-            </Link>
-          )}
-          {user?.role === 'STUDENT' && (
-            <Link 
-              to="/transcript"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-[#0f224a] text-sm font-bold shadow-md transition-all"
-            >
-              <Award className="h-4.5 w-4.5" />
-              View Transcript & GPA
-            </Link>
-          )}
-          {user?.role === 'TEACHER' && (
-            <Link 
-              to="/grading"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-[#0f224a] text-sm font-bold shadow-md transition-all"
-            >
-              <Edit3 className="h-4.5 w-4.5" />
-              Faculty Grading Portal
-            </Link>
-          )}
-          <Link 
-            to="/courses"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-semibold transition-all"
-          >
-            <BookOpen className="h-4.5 w-4.5" />
-            Explore Courses
-          </Link>
         </div>
       </div>
 
@@ -266,177 +223,105 @@ const Dashboard = () => {
 
       {renderStats()}
 
-      {/* Grid: Course Listings & Quick Operations */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Clean Course Summary Section */}
+      <div className="navy-card rounded-2xl overflow-hidden shadow-sm bg-white border border-slate-200">
+        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <h3 className="font-extrabold text-[#0f224a] text-base flex items-center gap-2">
+            <BookMarked className="h-5 w-5" />
+            {user?.role === 'ADMIN' ? 'All System Courses' : 'My Assigned Courses'}
+          </h3>
+          <Link to="/courses" className="text-[#0f224a] hover:underline text-xs font-bold flex items-center gap-1">
+            View All <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
         
-        {/* Main Section - Course lists */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="navy-card rounded-2xl overflow-hidden shadow-sm">
-            <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-              <h3 className="font-extrabold text-[#0f224a] text-base flex items-center gap-2">
-                <BookMarked className="h-5 w-5" />
-                {user?.role === 'ADMIN' ? 'All System Courses' : 'My Courses'}
-              </h3>
-              <Link to="/courses" className="text-[#0f224a] hover:underline text-xs font-bold flex items-center gap-1">
-                View All <ArrowUpRight className="h-3 w-3" />
-              </Link>
+        <div className="divide-y divide-slate-150">
+          {user?.role === 'ADMIN' && courses.length === 0 && (
+            <div className="p-8 text-center text-slate-500 text-sm bg-white">No courses available.</div>
+          )}
+          {user?.role === 'TEACHER' && teacherCourses.length === 0 && (
+            <div className="p-8 text-center text-slate-500 text-sm bg-white">You are not teaching any courses.</div>
+          )}
+          {user?.role === 'STUDENT' && studentCourses.length === 0 && (
+            <div className="p-8 text-center text-slate-500 text-sm bg-white">You are not enrolled in any courses.</div>
+          )}
+
+          {/* Render Admin Courses */}
+          {user?.role === 'ADMIN' && courses.slice(0, 5).map(course => (
+            <div key={course.id} className="p-6 flex items-start justify-between hover:bg-slate-50 transition-colors bg-white">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[10px] text-slate-650 font-bold uppercase">
+                    {course.courseCode}
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold">
+                    {course.department || 'Computer Science'}
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-[10px] font-bold">
+                    {course.credits || 3} Credits
+                  </span>
+                </div>
+                <h4 className="font-bold text-slate-800 text-sm mt-1">{course.name}</h4>
+                <p className="text-xs text-slate-500 max-w-lg line-clamp-1">{course.description}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-400 font-medium">Instructor</p>
+                <p className="text-xs font-bold text-[#0f224a]">{course.teacher?.username || 'Unassigned'}</p>
+                <p className="text-[11px] text-slate-500 mt-1 font-semibold">
+                  Capacity: {course.studentCount} / {course.maxCapacity || 30}
+                </p>
+              </div>
             </div>
-            
-            <div className="divide-y divide-slate-150">
-              {user?.role === 'ADMIN' && courses.length === 0 && (
-                <div className="p-8 text-center text-slate-500 text-sm bg-white">No courses available.</div>
-              )}
-              {user?.role === 'TEACHER' && teacherCourses.length === 0 && (
-                <div className="p-8 text-center text-slate-500 text-sm bg-white">You are not teaching any courses.</div>
-              )}
-              {user?.role === 'STUDENT' && studentCourses.length === 0 && (
-                <div className="p-8 text-center text-slate-500 text-sm bg-white">You are not enrolled in any courses.</div>
-              )}
+          ))}
 
-              {/* Render Admin Courses */}
-              {user?.role === 'ADMIN' && courses.slice(0, 4).map(course => (
-                <div key={course.id} className="p-6 flex items-start justify-between hover:bg-slate-50 transition-colors bg-white">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[10px] text-slate-650 font-bold uppercase">
-                        {course.courseCode}
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold">
-                        {course.department || 'Computer Science'}
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-[10px] font-bold">
-                        {course.credits || 3} Credits
-                      </span>
-                    </div>
-                    <h4 className="font-bold text-slate-800 text-sm mt-1">{course.name}</h4>
-                    <p className="text-xs text-slate-500 max-w-lg line-clamp-1">{course.description}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-slate-400 font-medium">Instructor</p>
-                    <p className="text-xs font-bold text-[#0f224a]">{course.teacher?.username || 'Unassigned'}</p>
-                    <p className="text-[11px] text-slate-500 mt-1 font-semibold">
-                      Capacity: {course.studentCount} / {course.maxCapacity || 30}
-                    </p>
-                  </div>
+          {/* Render Teacher Courses */}
+          {user?.role === 'TEACHER' && teacherCourses.slice(0, 5).map(course => (
+            <div key={course.id} className="p-6 flex items-start justify-between hover:bg-slate-50 transition-colors bg-white">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-100 text-[10px] text-emerald-800 font-bold uppercase">
+                    {course.courseCode}
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold">
+                    {course.department || 'Computer Science'}
+                  </span>
                 </div>
-              ))}
-
-              {/* Render Teacher Courses */}
-              {user?.role === 'TEACHER' && teacherCourses.slice(0, 4).map(course => (
-                <div key={course.id} className="p-6 flex items-start justify-between hover:bg-slate-50 transition-colors bg-white">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-100 text-[10px] text-emerald-800 font-bold uppercase">
-                        {course.courseCode}
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold">
-                        {course.department || 'Computer Science'}
-                      </span>
-                    </div>
-                    <h4 className="font-bold text-slate-800 text-sm mt-1">{course.name}</h4>
-                    <p className="text-xs text-slate-500 max-w-lg line-clamp-1">{course.description}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-slate-400 font-medium">Enrolled Students</p>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#0f224a] text-white text-xs font-bold mt-1 shadow-sm">
-                      {course.studentCount || 0} / {course.maxCapacity || 30}
-                    </span>
-                  </div>
-                </div>
-              ))}
-
-              {/* Render Student Courses */}
-              {user?.role === 'STUDENT' && studentCourses.slice(0, 4).map(course => (
-                <div key={course.id} className="p-6 flex items-start justify-between hover:bg-slate-50 transition-colors bg-white">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded bg-blue-50 border border-blue-105 text-[10px] text-blue-800 font-bold uppercase">
-                        {course.courseCode}
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-[10px] font-bold">
-                        {course.credits || 3} Credits
-                      </span>
-                    </div>
-                    <h4 className="font-bold text-slate-800 text-sm mt-1">{course.name}</h4>
-                    <p className="text-xs text-slate-500 max-w-lg line-clamp-1">{course.description}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-slate-400 font-medium">Instructor</p>
-                    <p className="text-xs font-bold text-slate-800">{course.teacher?.username || 'TBD'}</p>
-                  </div>
-                </div>
-              ))}
+                <h4 className="font-bold text-slate-800 text-sm mt-1">{course.name}</h4>
+                <p className="text-xs text-slate-500 max-w-lg line-clamp-1">{course.description}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-400 font-medium">Enrolled Students</p>
+                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#0f224a] text-white text-xs font-bold mt-1 shadow-sm">
+                  {course.studentCount || 0} / {course.maxCapacity || 30}
+                </span>
+              </div>
             </div>
-          </div>
+          ))}
 
-          {/* Campus Broadcast Feed Component */}
-          <AnnouncementsWidget />
+          {/* Render Student Courses */}
+          {user?.role === 'STUDENT' && studentCourses.slice(0, 5).map(course => (
+            <div key={course.id} className="p-6 flex items-start justify-between hover:bg-slate-50 transition-colors bg-white">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded bg-blue-50 border border-blue-105 text-[10px] text-blue-800 font-bold uppercase">
+                    {course.courseCode}
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-[10px] font-bold">
+                    {course.credits || 3} Credits
+                  </span>
+                </div>
+                <h4 className="font-bold text-slate-800 text-sm mt-1">{course.name}</h4>
+                <p className="text-xs text-slate-500 max-w-lg line-clamp-1">{course.description}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-400 font-medium">Instructor</p>
+                <p className="text-xs font-bold text-slate-800">{course.teacher?.username || 'TBD'}</p>
+              </div>
+            </div>
+          ))}
         </div>
-
-        {/* Sidebar Panel - Quick Operations */}
-        <div className="space-y-6">
-          <div className="navy-card p-6 rounded-2xl space-y-6 shadow-sm">
-            <h3 className="font-extrabold text-[#0f224a] text-base">Quick Operations</h3>
-            <div className="grid grid-cols-1 gap-3">
-              {user?.role === 'ADMIN' && (
-                <>
-                  <button 
-                    onClick={() => navigate('/users?create=true')}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
-                  >
-                    <Plus className="h-5 w-5 text-[#0f224a]" />
-                    <span>Add New User</span>
-                  </button>
-                  <button 
-                    onClick={() => navigate('/courses?create=true')}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
-                  >
-                    <Plus className="h-5 w-5 text-[#0f224a]" />
-                    <span>Create Course</span>
-                  </button>
-                </>
-              )}
-              {user?.role === 'STUDENT' && (
-                <>
-                  <button 
-                    onClick={() => navigate('/transcript')}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
-                  >
-                    <Award className="h-5 w-5 text-[#0f224a]" />
-                    <span>View Transcript & GPA</span>
-                  </button>
-                  <button 
-                    onClick={() => navigate('/courses')}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
-                  >
-                    <Search className="h-5 w-5 text-[#0f224a]" />
-                    <span>Browse Available Courses</span>
-                  </button>
-                </>
-              )}
-              {user?.role === 'TEACHER' && (
-                <>
-                  <button 
-                    onClick={() => navigate('/grading')}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
-                  >
-                    <Edit3 className="h-5 w-5 text-[#0f224a]" />
-                    <span>Faculty Grading Portal</span>
-                  </button>
-                  <button 
-                    onClick={() => navigate('/courses')}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0f224a] hover:bg-slate-100 text-sm font-semibold transition-all duration-200 text-left"
-                  >
-                    <BookOpen className="h-5 w-5 text-[#0f224a]" />
-                    <span>Update Class Syllabus</span>
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
       </div>
+
     </div>
   );
 };

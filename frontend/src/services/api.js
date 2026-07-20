@@ -72,4 +72,17 @@ export const announcementApi = {
   delete: (id) => api.delete(`/announcements/${id}`),
 };
 
+export const attendanceApi = {
+  getMyAttendance: (studentId) => api.get(`/attendance/my-attendance${studentId ? `?studentId=${studentId}` : ''}`),
+  getCourseAttendance: (courseId) => api.get(`/attendance/course/${courseId}`),
+  recordAttendance: (data) => api.post('/attendance/record', data),
+};
+
+export const feeApi = {
+  getMyStatement: (studentId) => api.get(`/fees/my-statement${studentId ? `?studentId=${studentId}` : ''}`),
+  getAllStatements: () => api.get('/fees/all'),
+  makePayment: (data) => api.post('/fees/pay', data),
+  generateStatement: (studentId, tuitionAmount) => api.post(`/fees/generate?studentId=${studentId}&tuitionAmount=${tuitionAmount || 1200.0}`),
+};
+
 export default api;

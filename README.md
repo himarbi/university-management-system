@@ -1,24 +1,33 @@
 # 🎓 University Management System
 
-A high-performance, full-stack academic administration platform built with **Spring Boot 3** and **React 19 (Vite)**. Standardized exclusively on **PostgreSQL** for data storage, featuring real-time GPA calculations, faculty grading portals, student academic transcripts, campus announcement broadcasts, robust Jakarta validations, and role-based JWT authentication.
+A high-performance, full-stack academic administration platform built with **Spring Boot 3** and **React 19 (Vite)**. Standardized exclusively on **PostgreSQL** for data storage, featuring dedicated pages for Attendance Tracking, Tuition & Fee Statements, GPA Transcripts, Faculty Grading Portals, Announcement Broadcasts, and Sidebar-only Navigation Architecture.
 
 ---
 
-## 🌟 Specialized Role Portals & Real University Features
+## 🌟 Architecture & Dedicated Role Modules
 
-### 🎓 Student Portal (`ROLE_STUDENT`)
-- **📜 Official Academic Transcript (`/transcript`)**: Comprehensive view of completed and active courses, letter grades (`A` through `F`), numerical score percentages, earned credit totals, and instructor feedback remarks.
-- **📊 Real-time Cumulative GPA Engine**: Automated calculation of Grade Point Average on a standard `0.0` – `4.0` scale based on course credit weightings.
-- **🎒 Course Catalog & Self-Enrollment (`/courses`)**: Instant course registration with real-time seat availability tracking.
+Every feature in the application resides on its own dedicated page accessed exclusively via the **Sidebar Navigation**:
 
-### 👩‍🏫 Faculty / Teacher Portal (`ROLE_TEACHER`)
-- **📝 Class Roster & Grading Portal (`/grading`)**: Select any assigned course to view enrolled students, assign or update numerical scores (0–100%), select letter grades, and add custom feedback remarks.
-- **📖 Syllabus & Course Management**: Update course outlines, titles, and department descriptions for taught classes.
+### 📅 Attendance Tracking Module (`/attendance`)
+- **Student View**: Track course attendance rates (% Present), total session logs, and present/absent dates.
+- **Teacher View**: Daily attendance sheet recorder for taught classes (*Present*, *Absent*, *Late*, *Excused*).
 
-### 📢 Admin Portal (`ROLE_ADMIN`)
-- **📣 Campus Announcement Broadcast Engine (`/announcements`)**: Publish university-wide announcements targeted to all users, students, or faculty.
-- **📈 Real-time System Analytics Dashboard (`/`)**: Comprehensive overview tracking user counts, total courses, system seat capacities, and enrollment utilization rates.
-- **👥 Full User Directory & Access Control (`/users`)**: Manage user accounts and assign system roles (`ADMIN`, `TEACHER`, `STUDENT`).
+### 💳 Tuition & Fee Management Module (`/fees`)
+- **Student View**: Itemized fee breakdown (Tuition per credit, Lab fees, Registration fees), balance due, status badges (`PAID`, `PENDING`, `OVERDUE`), and online payment submission.
+- **Admin View**: Generate student billing statements and monitor university fee collections.
+
+### 🎓 Student Transcript & GPA Engine (`/transcript`)
+- **Academic Transcript**: Official record of completed/enrolled courses, credits earned, letter grades (`A`–`F`), numerical scores, and instructor feedback.
+- **GPA Engine**: Cumulative Grade Point Average calculation (0.0 to 4.0 scale) and **Academic Honors designation** (*Summa Cum Laude*, *Magna Cum Laude*, *Good Standing*, *Academic Warning*).
+- **Printable Transcript**: Official printable transcript layout complete with registrar header and date.
+
+### 👩‍🏫 Faculty Grading Portal (`/grading`)
+- **Class Performance Analytics**: Real-time stats (Class average score %, pass rate %, highest score).
+- **Bulk Roster Grading**: Update multiple student grades in the roster simultaneously with quick score shortcuts.
+
+### 📢 Campus Broadcast System (`/announcements`)
+- **Priority Pinning**: Urgent and high-priority announcements highlighted with priority banners.
+- **Category Filtering**: Filter alerts by `EXAMS`, `ACADEMIC`, `EMERGENCY`, `CAMPUS_LIFE`, or `GENERAL`.
 
 ---
 
@@ -46,51 +55,43 @@ university-management-system/
 │   ├── src/main/java/com/university/management/
 │   │   ├── controller/
 │   │   │   ├── AnalyticsController.java     # GET /api/analytics/summary
-│   │   │   ├── AnnouncementController.java  # Campus announcement broadcasts
-│   │   │   ├── AuthController.java          # Authentication & Registration
-│   │   │   ├── CourseController.java        # Course CRUD & Enrollment
-│   │   │   ├── GradeController.java         # Transcript & Grading Portal
-│   │   │   └── UserController.java          # User Directory
+│   │   │   ├── AnnouncementController.java  # Campus announcements
+│   │   │   ├── AttendanceController.java    # Attendance tracking endpoints
+│   │   │   ├── AuthController.java          # Authentication
+│   │   │   ├── CourseController.java        # Course CRUD & enrollment
+│   │   │   ├── FeeController.java           # Tuition & fee management
+│   │   │   ├── GradeController.java         # Transcript & bulk grading
+│   │   │   └── UserController.java          # User directory
 │   │   ├── dto/
-│   │   │   ├── AnalyticsDto.java
-│   │   │   ├── AnnouncementDto.java
-│   │   │   ├── CourseDto.java
-│   │   │   ├── GradeDto.java / GradeSubmissionDto.java
-│   │   │   ├── SignupRequest.java / LoginRequest.java
-│   │   │   └── TranscriptDto.java
+│   │   │   ├── AnalyticsDto.java / AnnouncementDto.java
+│   │   │   ├── AttendanceDto.java / AttendanceSubmissionDto.java
+│   │   │   ├── CourseDto.java / ClassStatsDto.java
+│   │   │   ├── FeeStatementDto.java / PaymentSubmissionDto.java
+│   │   │   └── GradeDto.java / TranscriptDto.java
 │   │   ├── model/
-│   │   │   ├── Announcement.java            # Announcement entity
-│   │   │   ├── Course.java                  # Course entity (credits, capacity, dept)
-│   │   │   ├── Grade.java                   # Grade & GPA entity
-│   │   │   ├── Role.java                    # Enum (ADMIN, TEACHER, STUDENT)
-│   │   │   └── User.java                    # User entity
-│   │   ├── repository/
-│   │   │   ├── AnnouncementRepository.java
-│   │   │   ├── CourseRepository.java
-│   │   │   ├── GradeRepository.java
-│   │   │   └── UserRepository.java
-│   │   └── security/
-│   │       ├── GlobalExceptionHandler.java    # Centralized JSON Exception Interceptor
-│   │       └── WebSecurityConfig.java
+│   │   │   ├── Attendance.java              # Attendance entity
+│   │   │   ├── FeeStatement.java            # Tuition fee entity
+│   │   │   ├── Announcement.java / Course.java / Grade.java / User.java
+│   │   └── repository/
+│   │       ├── AttendanceRepository.java / FeeStatementRepository.java
+│   │       └── AnnouncementRepository.java / CourseRepository.java / GradeRepository.java / UserRepository.java
 │   └── src/main/resources/
 │       └── application.properties           # PostgreSQL configuration
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── AnnouncementsWidget.jsx      # Broadcast Feed & Admin Creator
-│   │   │   ├── DashboardLayout.jsx          # Role-based Navigation Sidebar
-│   │   │   └── PrivateRoute.jsx
-│   │   ├── context/
-│   │   │   └── AuthContext.jsx
+│   │   │   ├── AnnouncementsWidget.jsx      # Broadcast feed
+│   │   │   └── DashboardLayout.jsx          # Dedicated Sidebar Navigation
 │   │   ├── pages/
-│   │   │   ├── CourseCatalog.jsx
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── StudentTranscript.jsx        # Academic Transcript & GPA Card
-│   │   │   ├── TeacherGradingPortal.jsx     # Roster & Grade Submission
-│   │   │   └── UserManagement.jsx
+│   │   │   ├── AttendanceManager.jsx        # Dedicated Attendance Page
+│   │   │   ├── CourseCatalog.jsx            # Course Catalog Page
+│   │   │   ├── Dashboard.jsx                # Clean Overview Page
+│   │   │   ├── FeeManager.jsx               # Dedicated Tuition & Fees Page
+│   │   │   ├── StudentTranscript.jsx        # Academic Transcript & GPA Page
+│   │   │   ├── TeacherGradingPortal.jsx     # Faculty Roster & Grading Page
+│   │   │   └── UserManagement.jsx           # User Management Page
 │   │   └── services/
-│   │       └── api.js                       # Axios endpoints
+│   │       └── api.js                       # Axios API endpoints module
 │   ├── package.json
 │   └── vite.config.js
 └── README.md
@@ -126,40 +127,28 @@ npm run dev
 
 | Username | Password | Role | Access Rights |
 | :--- | :--- | :--- | :--- |
-| `admin` | `admin123` | `ROLE_ADMIN` | Full System Oversight, User Management, Announcements & Analytics |
-| `john_doe` | `teacher123` | `ROLE_TEACHER` | Faculty Grading Portal (`/grading`), Class Roster & Syllabus Outlines |
-| `alice_jones` | `student123` | `ROLE_STUDENT` | Official Transcript (`/transcript`), GPA Engine & Course Enrollment |
+| `admin` | `admin123` | `ROLE_ADMIN` | Full System Oversight, Fee Generation, User Directory & Announcements |
+| `john_doe` | `teacher123` | `ROLE_TEACHER` | Faculty Grading Portal (`/grading`), Daily Attendance Sheet (`/attendance`) |
+| `alice_jones` | `student123` | `ROLE_STUDENT` | Official Transcript (`/transcript`), Attendance Tracker (`/attendance`), Fee Statement (`/fees`) |
 
 ---
 
 ## 📡 REST API Summary
 
-### 🔑 Auth & Analytics
-- `POST /api/auth/login` | `POST /api/auth/register`
-- `GET /api/analytics/summary`
+### 📅 Attendance API
+- `GET /api/attendance/my-attendance` - Fetch student attendance log
+- `GET /api/attendance/course/{courseId}` - Fetch course attendance log
+- `POST /api/attendance/record` - Record or update daily attendance
 
-### 🎓 Grades & Transcripts
-- `GET /api/grades/transcript` - Student transcript and cumulative GPA
-- `GET /api/grades/course/{courseId}` - Faculty view of class roster grades
-- `POST /api/grades/submit` - Faculty submission of numerical score & letter grade
+### 💳 Fee & Payment API
+- `GET /api/fees/my-statement` - Fetch student tuition balance & payment history
+- `GET /api/fees/all` - Fetch all billing statements (Admin)
+- `POST /api/fees/pay` - Process tuition payment
+- `POST /api/fees/generate` - Generate student billing statement (Admin)
 
-### 📣 Announcements
-- `GET /api/announcements` - Fetch active announcements
-- `POST /api/announcements` - Admin broadcast creation
-- `DELETE /api/announcements/{id}` - Remove announcement
-
-### 📚 Courses & Users
-- `GET /api/courses` | `POST /api/courses` | `POST /api/courses/{id}/enroll`
-- `GET /api/users` | `GET /api/users/teachers`
-
----
-
-## 🤝 Contributing Guidelines
-
-1. **Fork the Repo**: Click **Fork** on [GitHub](https://github.com/himarbi/university-management-system).
-2. **Branch**: `git checkout -b feature/your-feature-name`
-3. **Commit**: `git commit -m "feat: your feature"`
-4. **Push**: `git push origin feature/your-feature-name` and open a Pull Request.
+### 🎓 Grades & Announcements API
+- `GET /api/grades/transcript` | `POST /api/grades/submit-bulk`
+- `GET /api/announcements` | `POST /api/announcements`
 
 ---
 

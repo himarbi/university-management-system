@@ -11,6 +11,8 @@ import UserManagement from './pages/UserManagement';
 import CourseCatalog from './pages/CourseCatalog';
 import StudentTranscript from './pages/StudentTranscript';
 import TeacherGradingPortal from './pages/TeacherGradingPortal';
+import AttendanceManager from './pages/AttendanceManager';
+import FeeManager from './pages/FeeManager';
 import AnnouncementsWidget from './components/AnnouncementsWidget';
 
 function App() {
@@ -21,23 +23,13 @@ function App() {
           {/* Public login/register page */}
           <Route path="/login" element={<Login />} />
 
-          {/* Protected Portal Routes */}
+          {/* Protected Dedicated Portal Routes */}
           <Route
             path="/"
             element={
               <PrivateRoute>
                 <DashboardLayout>
                   <Dashboard />
-                </DashboardLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <PrivateRoute allowedRoles={['ADMIN']}>
-                <DashboardLayout>
-                  <UserManagement />
                 </DashboardLayout>
               </PrivateRoute>
             }
@@ -63,11 +55,41 @@ function App() {
             }
           />
           <Route
+            path="/attendance"
+            element={
+              <PrivateRoute>
+                <DashboardLayout>
+                  <AttendanceManager />
+                </DashboardLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/fees"
+            element={
+              <PrivateRoute allowedRoles={['STUDENT', 'ADMIN']}>
+                <DashboardLayout>
+                  <FeeManager />
+                </DashboardLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/grading"
             element={
               <PrivateRoute allowedRoles={['TEACHER', 'ADMIN']}>
                 <DashboardLayout>
                   <TeacherGradingPortal />
+                </DashboardLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <PrivateRoute allowedRoles={['ADMIN']}>
+                <DashboardLayout>
+                  <UserManagement />
                 </DashboardLayout>
               </PrivateRoute>
             }

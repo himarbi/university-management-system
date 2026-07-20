@@ -7,6 +7,7 @@ import com.university.management.model.User;
 import com.university.management.repository.CourseRepository;
 import com.university.management.repository.UserRepository;
 import com.university.management.security.UserDetailsImpl;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,10 +35,44 @@ public class CourseController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
-    public List<CourseDto> getAllCourses() {
+    public List<CourseDto> getAllCourses(@RequestParam(required = false) String search,
+                                         @RequestParam(required = false) String department) {
         return courseRepository.findAll().stream()
+                .filter(course -> {
+                    if (search != null && !search.isBlank()) {
+                        String q = search.toLowerCase();
+                        boolean matchCode = course.getCourseCode() != null && course.getCourseCode().toLowerCase().contains(q);
+                        boolean matchName = course.getName() != null && course.getName().toLowerCase().contains(q);
+                        boolean matchDesc = course.getDescription() != null && course.getDescription().toLowerCase().contains(q);
+                        if (!matchCode && !matchName && !matchDesc) return false;
+                    }
+                    if (department != null && !department.isBlank()) {
+                        if (course.getDepartment() == null || !course.getDepartment().equalsIgnoreCase(department)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
                 .map(CourseDto::build)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/my-courses")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    public List<CourseDto> getMyCourses() {
+        User currentUser = getCurrentUser();
+        if (currentUser.getRole() == Role.TEACHER) {
+            return courseRepository.findAll().stream()
+                    .filter(c -> c.getTeacher() != null && c.getTeacher().getId().equals(currentUser.getId()))
+                    .map(CourseDto::build)
+                    .collect(Collectors.toList());
+        } else if (currentUser.getRole() == Role.STUDENT) {
+            return courseRepository.findAll().stream()
+                    .filter(c -> c.getStudents() != null && c.getStudents().stream().anyMatch(s -> s.getId().equals(currentUser.getId())))
+                    .map(CourseDto::build)
+                    .collect(Collectors.toList());
+        }
+        return courseRepository.findAll().stream().map(CourseDto::build).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -50,7 +85,7 @@ public class CourseController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> createCourse(@RequestBody CourseDto courseDto) {
+    public ResponseEntity<?> createCourse(@Valid @RequestBody CourseDto courseDto) {
         if (courseRepository.existsByCourseCode(courseDto.getCourseCode())) {
             return ResponseEntity.badRequest().body("Error: Course code is already in use!");
         }
@@ -66,9 +101,12 @@ public class CourseController {
         }
 
         Course course = Course.builder()
-                .courseCode(courseDto.getCourseCode())
+                .courseCode(courseDto.getCourseCode().toUpperCase())
                 .name(courseDto.getName())
                 .description(courseDto.getDescription())
+                .department(courseDto.getDepartment() != null ? courseDto.getDepartment() : "Computer Science")
+                .credits(courseDto.getCredits() != null ? courseDto.getCredits() : 3)
+                .maxCapacity(courseDto.getMaxCapacity() != null ? courseDto.getMaxCapacity() : 30)
                 .teacher(teacher)
                 .build();
 
@@ -78,10 +116,10 @@ public class CourseController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public ResponseEntity<?> updateCourse(@PathVariable Long id, @RequestBody CourseDto courseDto) {
+    public ResponseEntity<?> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseDto courseDto) {
         return courseRepository.findById(id).map(course -> {
             User currentUser = getCurrentUser();
-            
+
             if (currentUser.getRole() == Role.TEACHER) {
                 if (course.getTeacher() == null || !course.getTeacher().getId().equals(currentUser.getId())) {
                     return ResponseEntity.status(403).body("Error: You are not authorized to update this course!");
@@ -89,10 +127,10 @@ public class CourseController {
             }
 
             if (currentUser.getRole() == Role.ADMIN) {
-                if (!course.getCourseCode().equals(courseDto.getCourseCode()) && courseRepository.existsByCourseCode(courseDto.getCourseCode())) {
+                if (!course.getCourseCode().equalsIgnoreCase(courseDto.getCourseCode()) && courseRepository.existsByCourseCode(courseDto.getCourseCode())) {
                     return ResponseEntity.badRequest().body("Error: Course code is already in use!");
                 }
-                course.setCourseCode(courseDto.getCourseCode());
+                course.setCourseCode(courseDto.getCourseCode().toUpperCase());
 
                 if (courseDto.getTeacher() != null && courseDto.getTeacher().getId() != null) {
                     Optional<User> teacherOpt = userRepository.findById(courseDto.getTeacher().getId());
@@ -108,6 +146,9 @@ public class CourseController {
 
             course.setName(courseDto.getName());
             course.setDescription(courseDto.getDescription());
+            if (courseDto.getDepartment() != null) course.setDepartment(courseDto.getDepartment());
+            if (courseDto.getCredits() != null) course.setCredits(courseDto.getCredits());
+            if (courseDto.getMaxCapacity() != null) course.setMaxCapacity(courseDto.getMaxCapacity());
 
             Course updatedCourse = courseRepository.save(course);
             return ResponseEntity.ok(CourseDto.build(updatedCourse));
@@ -141,6 +182,16 @@ public class CourseController {
                     return ResponseEntity.badRequest().body("Error: Student not found or invalid!");
                 }
                 studentToEnroll = studentOpt.get();
+            }
+
+            if (course.getStudents() != null && course.getStudents().contains(studentToEnroll)) {
+                return ResponseEntity.badRequest().body("Error: Student is already enrolled in this course!");
+            }
+
+            int currentCount = course.getStudents() != null ? course.getStudents().size() : 0;
+            int maxCap = course.getMaxCapacity() != null ? course.getMaxCapacity() : 30;
+            if (currentCount >= maxCap) {
+                return ResponseEntity.badRequest().body("Error: Course capacity limit reached (" + maxCap + " max)!");
             }
 
             course.getStudents().add(studentToEnroll);

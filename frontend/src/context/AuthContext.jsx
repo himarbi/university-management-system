@@ -16,19 +16,25 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  const parseErrorMessage = (error, defaultMsg) => {
+    if (error.response?.data?.errors) {
+      return Object.values(error.response.data.errors).join(' | ');
+    }
+    return error.response?.data?.message || error.response?.data || defaultMsg;
+  };
+
   const login = async (username, password) => {
     try {
       const response = await api.post('/auth/login', { username, password });
       const { token, ...userData } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       return { success: true };
     } catch (error) {
       console.error('Login failed:', error);
-      const message = error.response?.data?.message || error.response?.data || 'Invalid credentials';
-      return { success: false, error: message };
+      return { success: false, error: parseErrorMessage(error, 'Invalid username or password') };
     }
   };
 
@@ -38,8 +44,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error('Registration failed:', error);
-      const message = error.response?.data?.message || error.response?.data || 'Registration failed';
-      return { success: false, error: message };
+      return { success: false, error: parseErrorMessage(error, 'Registration failed') };
     }
   };
 

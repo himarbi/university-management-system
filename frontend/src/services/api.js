@@ -18,9 +18,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Interceptor to handle authentication errors (e.g. 401 unauthorized)
@@ -35,5 +33,29 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const authApi = {
+  login: (data) => api.post('/auth/login', data),
+  signup: (data) => api.post('/auth/register', data),
+};
+
+export const courseApi = {
+  getAll: (params) => api.get('/courses', { params }),
+  getMyCourses: () => api.get('/courses/my-courses'),
+  getById: (id) => api.get(`/courses/${id}`),
+  create: (data) => api.post('/courses', data),
+  update: (id, data) => api.put(`/courses/${id}`, data),
+  delete: (id) => api.delete(`/courses/${id}`),
+  enroll: (id, studentId) => api.post(`/courses/${id}/enroll${studentId ? `?studentId=${studentId}` : ''}`),
+  unenroll: (id, studentId) => api.post(`/courses/${id}/unenroll${studentId ? `?studentId=${studentId}` : ''}`),
+};
+
+export const userApi = {
+  getAll: () => api.get('/users'),
+};
+
+export const analyticsApi = {
+  getSummary: () => api.get('/analytics/summary'),
+};
 
 export default api;

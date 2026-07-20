@@ -27,7 +27,6 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Only run initialization if there are no users in the database
         if (userRepository.count() == 0) {
             System.out.println("No users found. Seeding initial data...");
 
@@ -76,27 +75,36 @@ public class DataInitializer implements CommandLineRunner {
 
             // Create Courses
             Course course1 = Course.builder()
-                    .courseCode("CS101")
+                    .courseCode("CS-101")
                     .name("Introduction to Computer Science")
                     .description("Learn the fundamentals of computer programming using Java, algorithmic thinking, and problem solving.")
+                    .department("Computer Science")
+                    .credits(4)
+                    .maxCapacity(30)
                     .teacher(teacher1)
                     .students(new HashSet<>(Set.of(student1)))
                     .build();
             courseRepository.save(course1);
 
             Course course2 = Course.builder()
-                    .courseCode("MATH201")
+                    .courseCode("MATH-201")
                     .name("Calculus II")
                     .description("Covers integration, applications of integration, differential equations, sequences, and series.")
+                    .department("Mathematics")
+                    .credits(3)
+                    .maxCapacity(25)
                     .teacher(teacher2)
                     .students(new HashSet<>(Set.of(student1, student2)))
                     .build();
             courseRepository.save(course2);
 
             Course course3 = Course.builder()
-                    .courseCode("SWE310")
+                    .courseCode("SWE-310")
                     .name("Software Engineering Practices")
                     .description("Introductory course on software design patterns, agile workflows, version control, and testing frameworks.")
+                    .department("Software Engineering")
+                    .credits(3)
+                    .maxCapacity(40)
                     .teacher(teacher1)
                     .students(new HashSet<>())
                     .build();

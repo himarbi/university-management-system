@@ -1,179 +1,224 @@
 # 🎓 University Management System
 
-A modern full-stack web application for managing university courses, users, and roles. Built with **Spring Boot** on the backend and **React (Vite)** on the frontend, featuring secure JWT-based authentication and role-based access control.
+A high-performance, full-stack academic administration platform built with **Spring Boot 3** and **React 19 (Vite)**. Standardized exclusively on **PostgreSQL** for data storage, featuring robust Jakarta validation constraints, real-time analytics dashboards, course capacity enforcement, and role-based JWT authentication.
 
 ---
 
-## 🚀 Key Features
+## ⚡ Recent Enhancements & Hype Features
 
-- **🔐 User Authentication & Authorization**: Secure signup, login, and JWT token-based authorization.
-- **👥 Role-Based Access Control (RBAC)**: Support for `ADMIN`, `FACULTY`, and `STUDENT` roles with granular access controls.
-- **📚 Course Management**: Create, view, update, and manage university courses.
-- **👤 User Management**: Admin dashboard to manage users, assign roles, and inspect profiles.
-- **💾 Dual Database Support**: Lightweight **H2 In-Memory Database** for instant local development, plus **PostgreSQL** support for production readiness.
-- **🎨 Modern UI/UX**: Dynamic responsive dashboard built with React 19, Tailwind CSS v4, and Lucide icons.
+- **📊 Real-time System Analytics API**: Instant metrics endpoint (`/api/analytics/summary`) tracking total students, faculty count, course offerings, total enrollments, and overall university seat utilization.
+- **🛡️ Strict Field Validation Engine**: Centralized validation powered by Spring Validation (`@Valid`) and a custom `@RestControllerAdvice` Global Exception Handler. Validates email formats, username patterns, password lengths, course codes (`CS-101`), credits, and capacity bounds with field-specific JSON error payloads.
+- **🪑 Seat Capacity & Enrollment Limits**: Auto-enforced seat limits (`maxCapacity`) preventing over-enrollment. Displays real-time progress meters per course card.
+- **🏷️ Department & Credit Management**: Categorize courses by department (Computer Science, Mathematics, Software Engineering, etc.) and assign course credit values (1-6 Credits).
+- **🔎 Dynamic Course Search & Department Filtering**: Live search by course code, title, instructor, or department category.
+- **🗄️ Pure PostgreSQL Engine**: Standardized configuration running directly on PostgreSQL.
 
 ---
 
-## 🛠️ Prerequisites & Required Tools
+## 🛠️ Required Tools & Tech Stack
 
-Before getting started, ensure you have the following installed on your machine:
+### Technology Stack
+- **Backend Framework**: Java 21+ / Java 23, Spring Boot 3, Spring Security, Spring Data JPA
+- **Frontend Framework**: React 19, Vite 8, Tailwind CSS v4, Lucide Icons, Axios, React Router v7
+- **Database Engine**: **PostgreSQL 14+** (Exclusive database)
+- **Authentication**: Stateless JSON Web Tokens (JWT) with HS256 encryption
 
-| Tool | Recommended Version | Download / Installation Link |
+### Prerequisites & Downloads
+
+| Tool | Required Version | Download Link |
 | :--- | :--- | :--- |
-| **Git** | `v2.x` or higher | [git-scm.com](https://git-scm.com/downloads) |
-| **Java JDK** | `v21` or `v23` | [OpenJDK Download](https://adoptium.net/) or [Oracle JDK](https://www.oracle.com/java/technologies/downloads/) |
+| **Git** | `v2.x`+ | [git-scm.com](https://git-scm.com/downloads) |
+| **Java JDK** | `v21` or `v23` | [Adoptium Temurin OpenJDK](https://adoptium.net/) |
 | **Node.js** | `v18.x` or `v20.x`+ | [nodejs.org](https://nodejs.org/) |
-| **npm** | `v9.x`+ (bundled with Node) | Included with Node.js |
-| **PostgreSQL** *(Optional)* | `v14` or higher | [postgresql.org](https://www.postgresql.org/download/) (Required only if running with full DB) |
-| **IDE** | VS Code / IntelliJ IDEA | [VS Code](https://code.visualstudio.com/) or [IntelliJ IDEA](https://www.jetbrains.com/idea/) |
+| **PostgreSQL** | `v14` or higher | [postgresql.org](https://www.postgresql.org/download/) |
+| **IDE** | VS Code / IntelliJ IDEA | [Visual Studio Code](https://code.visualstudio.com/) |
 
 ---
 
-## 📁 Project Structure
+## 🔒 Validation Constraints Reference
 
-```text
-university-management-system/
-│
-├── 📂 backend/                     # Spring Boot Java Backend
-│   ├── 📂 src/
-│   │   ├── 📂 main/java/com/university/management/
-│   │   │   ├── 📂 controller/      # REST Endpoints (Auth, User, Course)
-│   │   │   ├── 📂 dto/             # Data Transfer Objects
-│   │   │   ├── 📂 model/           # JPA Entities (User, Role, Course)
-│   │   │   ├── 📂 repository/      # Spring Data Repositories
-│   │   │   └── 📂 security/        # Spring Security & JWT Filter Setup
-│   │   └── 📂 main/resources/
-│   │       ├── application.properties    # PostgreSQL configuration
-│   │       └── application-h2.properties # H2 memory database configuration
-│   ├── mvnw / mvnw.cmd             # Maven Wrapper scripts
-│   └── pom.xml                     # Maven project dependencies
-│
-├── 📂 frontend/                    # Vite + React Frontend
-│   ├── 📂 src/
-│   │   ├── 📂 components/          # Reusable UI components & layouts
-│   │   ├── 📂 context/             # Authentication state context
-│   │   ├── 📂 pages/               # Dashboard, Login, UserManagement, CourseCatalog
-│   │   └── 📂 services/            # Axios API instance & endpoints
-│   ├── package.json                # Frontend dependencies & npm scripts
-│   └── vite.config.js              # Vite configuration & dev proxy
-│
-└── README.md                       # Project Documentation
+All client input is validated on the backend before processing:
+
+| DTO / Model | Field | Validation Rules | Description / Example |
+| :--- | :--- | :--- | :--- |
+| `SignupRequest` | `username` | `@NotBlank`, `@Size(3, 20)`, `@Pattern` | Letters, numbers, dots, hyphens, underscores (e.g. `john_doe`) |
+| `SignupRequest` | `email` | `@NotBlank`, `@Size(max=50)`, `@Email` | RFC-compliant email (e.g. `user@university.com`) |
+| `SignupRequest` | `password` | `@NotBlank`, `@Size(6, 40)` | Minimum 6 characters required |
+| `LoginRequest` | `username` | `@NotBlank`, `@Size(3, 50)` | Registered username |
+| `CourseDto` | `courseCode` | `@NotBlank`, `@Size(2, 15)`, `@Pattern` | Uppercase letters, numbers, hyphens (e.g. `CS-101`) |
+| `CourseDto` | `name` | `@NotBlank`, `@Size(3, 100)` | Descriptive title |
+| `CourseDto` | `credits` | `@NotNull`, `@Min(1)`, `@Max(6)` | Academic credits (1-6) |
+| `CourseDto` | `maxCapacity` | `@NotNull`, `@Min(1)`, `@Max(500)` | Maximum allowed enrolled students |
+| `CourseDto` | `department` | `@NotBlank`, `@Size(max=100)` | Academic department |
+
+### Validation Error Response Format
+When validation fails, the API returns an `HTTP 400 Bad Request` JSON object:
+
+```json
+{
+  "timestamp": "2026-07-20T20:15:00",
+  "status": 400,
+  "error": "Validation Failed",
+  "errors": {
+    "email": "Email must be a valid email address (e.g. user@domain.com)",
+    "courseCode": "Course code must consist of uppercase letters, numbers, or hyphens (e.g., CS-101)"
+  }
+}
 ```
 
 ---
 
-## 💻 Quick Start & Setup Guide
+## 📁 Project Directory Layout
 
-### 1️⃣ Clone the Repository
+```text
+university-management-system/
+├── backend/
+│   ├── src/main/java/com/university/management/
+│   │   ├── controller/
+│   │   │   ├── AnalyticsController.java  # GET /api/analytics/summary
+│   │   │   ├── AuthController.java       # Login & Registration endpoints
+│   │   │   ├── CourseController.java     # Course CRUD, Search & Enrollment
+│   │   │   └── UserController.java       # User Directory & Role Assignment
+│   │   ├── dto/
+│   │   │   ├── AnalyticsDto.java         # Dashboard metrics transfer object
+│   │   │   ├── CourseDto.java            # Validated Course DTO
+│   │   │   ├── JwtResponse.java          # Auth token response
+│   │   │   ├── LoginRequest.java         # Validated Login DTO
+│   │   │   ├── SignupRequest.java        # Validated Registration DTO
+│   │   │   └── UserDto.java              # User summary DTO
+│   │   ├── model/
+│   │   │   ├── Course.java               # JPA Entity (credits, capacity, dept)
+│   │   │   ├── Role.java                 # Enum (ADMIN, TEACHER, STUDENT)
+│   │   │   └── User.java                 # JPA Entity (username, email, pass)
+│   │   ├── repository/
+│   │   │   ├── CourseRepository.java
+│   │   │   └── UserRepository.java
+│   │   └── security/
+│   │       ├── GlobalExceptionHandler.java # Validation Exception Interceptor
+│   │       ├── JwtAuthenticationFilter.java
+│   │       ├── JwtUtils.java
+│   │       └── WebSecurityConfig.java
+│   └── src/main/resources/
+│       └── application.properties        # Pure PostgreSQL database configuration
+├── frontend/
+│   ├── src/
+│   │   ├── components/                   # Navbar & Dashboard Layout
+│   │   ├── context/                      # AuthContext token management
+│   │   ├── pages/                        # Dashboard, CourseCatalog, UserManagement, Login
+│   │   └── services/                     # Axios API endpoints module
+│   ├── package.json
+│   └── vite.config.js
+└── README.md
+```
 
+---
+
+## 🗄️ Database Setup (PostgreSQL)
+
+This application uses **PostgreSQL** exclusively.
+
+1. **Start PostgreSQL**: Ensure your PostgreSQL server is running on port `5432`.
+2. **Create Database**:
+   ```sql
+   CREATE DATABASE university_db;
+   ```
+3. **Configure Database Credentials**:  
+   Update [`backend/src/main/resources/application.properties`](backend/src/main/resources/application.properties) if your username or password differs:
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/university_db
+   spring.datasource.username=postgres
+   spring.datasource.password=YOUR_POSTGRES_PASSWORD
+   spring.datasource.driver-class-name=org.postgresql.Driver
+   spring.jpa.hibernate.ddl-auto=update
+   ```
+
+---
+
+## 🚀 Step-by-Step Running Guide
+
+### 1️⃣ Clone Repository
 ```bash
 git clone https://github.com/himarbi/university-management-system.git
 cd university-management-system
 ```
 
----
-
-### 2️⃣ Run the Backend (Spring Boot)
-
-You can launch the backend using either the lightweight **H2 In-Memory Database** (no setup required) or **PostgreSQL**.
-
-#### Option A: Run with H2 In-Memory DB (Recommended for quick testing)
-
-**On Windows (PowerShell):**
-```powershell
-cd backend
-$env:SPRING_PROFILES_ACTIVE="h2"; .\mvnw spring-boot:run
-```
-
-**On Linux / macOS (Bash):**
-```bash
-cd backend
-SPRING_PROFILES_ACTIVE=h2 ./mvnw spring-boot:run
-```
-
-> **H2 Console Access**: Once started, navigate to [http://localhost:8080/h2-console](http://localhost:8080/h2-console)  
-> - **JDBC URL**: `jdbc:h2:mem:university_db`  
-> - **Username**: `sa`  
-> - **Password**: *(leave blank)*
-
-#### Option B: Run with PostgreSQL
-
-1. Ensure PostgreSQL is running locally on port `5432` with database `university_db`.
-2. Update database credentials in [`backend/src/main/resources/application.properties`](backend/src/main/resources/application.properties).
-3. Run:
+### 2️⃣ Run Spring Boot Backend
 ```bash
 cd backend
 ./mvnw spring-boot:run
 ```
+> The server starts on **`http://localhost:8080`**.  
+> *Initial data (Admin, Faculty, Students, Sample Courses) seeds automatically if the database is empty.*
 
----
-
-### 3️⃣ Run the Frontend (React + Vite)
-
-Open a new terminal window:
-
+### 3️⃣ Run Vite + React Frontend
+In a new terminal:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-
-The application will be accessible at:  
-👉 **[http://localhost:5173](http://localhost:5173)**
+> Access the web application at **`http://localhost:5173`**.
 
 ---
 
-## 🔑 Default Initial Credentials
+## 🔑 Initial Pre-Seeded Accounts
 
-When started for the first time, initial seed data is generated automatically:
-
-| Username | Password | Default Role |
-| :--- | :--- | :--- |
-| `admin` | `admin123` | `ROLE_ADMIN` |
-
----
-
-## 🔌 API Endpoints Summary
-
-### Authentication (`/api/auth`)
-- `POST /api/auth/signup` - Register a new user account
-- `POST /api/auth/login` - Authenticate user and receive JWT token
-
-### Users (`/api/users`)
-- `GET /api/users` - List all registered users (Admin only)
-- `GET /api/users/{id}` - Fetch single user details
-
-### Courses (`/api/courses`)
-- `GET /api/courses` - Fetch available course catalog
-- `POST /api/courses` - Create a new course (Admin/Faculty)
-- `DELETE /api/courses/{id}` - Remove a course
+| Username | Password | Role | Access Level |
+| :--- | :--- | :--- | :--- |
+| `admin` | `admin123` | `ROLE_ADMIN` | Full System Management, User Roles & Course Creation |
+| `john_doe` | `teacher123` | `ROLE_TEACHER` | Manage Assigned Class Syllabi & View Roster |
+| `alice_jones` | `student123` | `ROLE_STUDENT` | Course Catalog Browsing & Self-Enrollment |
 
 ---
 
-## 🤝 Contribution Guidelines
+## 📡 Complete REST API Documentation
 
-We welcome contributions from everyone! Follow these steps to submit your changes:
+### 🔑 Authentication
+- `POST /api/auth/register` - Register a new user (Validates username, email, password format)
+- `POST /api/auth/login` - Authenticate and return JWT token
 
-1. **Fork the Repository**: Click the "Fork" button at the top right of this GitHub page.
-2. **Create a Feature Branch**:
+### 📊 Analytics
+- `GET /api/analytics/summary` - System-wide statistics (Total Users, Enrollments, Capacity Rates)
+
+### 📚 Courses
+- `GET /api/courses` - Fetch courses (supports query params `?search=...&department=...`)
+- `GET /api/courses/my-courses` - Fetch current user's enrolled or taught courses
+- `GET /api/courses/{id}` - Fetch single course details
+- `POST /api/courses` - Create new course (Admin only, validates capacity & credits)
+- `PUT /api/courses/{id}` - Update course details (Admin / Assigned Teacher)
+- `DELETE /api/courses/{id}` - Remove course (Admin only)
+- `POST /api/courses/{id}/enroll` - Enroll in course (Auto-enforces capacity limit)
+- `POST /api/courses/{id}/unenroll` - Drop enrolled course
+
+### 👥 Users
+- `GET /api/users` - Fetch user directory (Admin only)
+- `GET /api/users/teachers` - List faculty instructors
+
+---
+
+## 🔮 Future Roadmap Features
+
+- [ ] **GPA & Gradebook Module**: Faculty can enter letter grades; students view cumulative GPA.
+- [ ] **Assignment & Submission Portal**: File uploads for student homework and automated deadline tracking.
+- [ ] **Real-Time Notification Center**: Push notifications for enrollment confirmations and syllabus updates.
+- [ ] **Transcript Export**: One-click PDF transcript download for students.
+- [ ] **Google OAuth2 SSO**: Single Sign-On integration for university email domains.
+
+---
+
+## 🤝 Contributing Guidelines
+
+1. **Fork the Repo**: Click **Fork** on [GitHub](https://github.com/himarbi/university-management-system).
+2. **Branch Naming**:
    ```bash
-   git checkout -b feature/amazing-new-feature
+   git checkout -b feature/your-feature-name
    ```
-3. **Make Your Changes**: Ensure code formatting is clean and tests pass.
-4. **Commit Your Changes**:
-   ```bash
-   git commit -m "feat: Add amazing new feature"
-   ```
-5. **Push to Your Branch**:
-   ```bash
-   git push origin feature/amazing-new-feature
-   ```
-6. **Open a Pull Request**: Go to the original repository and click **New Pull Request**.
+3. **Commit Messages**: Use clean commit conventions (`feat: ...`, `fix: ...`, `docs: ...`).
+4. **Push & PR**: Push to your fork and submit a Pull Request to `main`.
 
 ---
 
 ## 📜 License & Author
 
-- **Author / Maintainer**: [Ibrahim A. Ahmed (himarbi)](https://github.com/himarbi)
-- **Project Repository**: [university-management-system](https://github.com/himarbi/university-management-system)
+- **Author**: [Ibrahim A. Ahmed (himarbi)](https://github.com/himarbi)
+- **Repository**: [https://github.com/himarbi/university-management-system](https://github.com/himarbi/university-management-system)

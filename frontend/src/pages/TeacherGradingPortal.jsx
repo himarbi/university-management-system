@@ -12,7 +12,8 @@ import {
   TrendingUp,
   Percent,
   CheckCircle2,
-  ListChecks
+  ListChecks,
+  Info
 } from 'lucide-react';
 
 const TeacherGradingPortal = () => {
@@ -215,6 +216,18 @@ const TeacherGradingPortal = () => {
             ))}
           </select>
         </div>
+      </div>
+
+      {/* Demo & Section Explanation Banner */}
+      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
+        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
+          <Info className="h-4 w-4 text-blue-600" />
+          Feature Demo Guide: Faculty Grading & Class Roster Analytics
+        </div>
+        <p>
+          Instructors can select any assigned course from the top dropdown to view enrolled students, monitor 
+          **Class Average %, Pass Rates, and Score Distributions**. You can edit grades in bulk directly in the table and click <strong>"Save All Roster Grades"</strong>, or open the single student edit modal for preset shortcuts (`A-95%`, `B-85%`).
+        </p>
       </div>
 
       {error && (

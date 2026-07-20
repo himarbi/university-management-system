@@ -13,7 +13,8 @@ import {
   AlertOctagon, 
   Tag, 
   Search,
-  Pin
+  Pin,
+  Info
 } from 'lucide-react';
 
 const AnnouncementsWidget = ({ fullPage = false }) => {
@@ -128,6 +129,19 @@ const AnnouncementsWidget = ({ fullPage = false }) => {
             Post Announcement
           </button>
         )}
+      </div>
+
+      {/* Demo & Section Explanation Banner */}
+      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
+        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
+          <Info className="h-4 w-4 text-blue-600" />
+          Feature Demo Guide: Campus Broadcast & Priority Alert Engine
+        </div>
+        <p>
+          Broadcast campus notices across target audiences (ALL, STUDENTS, TEACHERS). 
+          High-priority and <strong>URGENT</strong> alerts feature animated red banners and top pinning. 
+          Use the category dropdown or priority filter to test searching and filtering broadcasts.
+        </p>
       </div>
 
       {/* Filter Toolbar */}

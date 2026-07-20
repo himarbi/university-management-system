@@ -9,7 +9,8 @@ import {
   ArrowUpRight, 
   BookMarked,
   BarChart3,
-  Percent
+  Percent,
+  Info
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -69,7 +70,7 @@ const Dashboard = () => {
             </div>
 
             <div className="navy-card p-6 rounded-2xl flex items-center gap-5 border-l-4 border-l-[#0f224a] navy-card-hover">
-              <div className="p-3 bg-[#0f224a]/10 rounded-xl text-[#0f224a]">
+              <div className="p-[#0f224a]/10 rounded-xl text-[#0f224a] p-3">
                 <BookOpen className="h-6 w-6" />
               </div>
               <div>
@@ -205,14 +206,26 @@ const Dashboard = () => {
       {/* Top Banner */}
       <div className="bg-[#0f224a] text-white p-8 rounded-2xl flex flex-col md:flex-row md:items-center md:justify-between gap-6 relative overflow-hidden shadow-lg">
         <div className="space-y-2">
-          <span className="text-blue-300 text-xs font-bold uppercase tracking-wider">Academic Portal</span>
+          <span className="text-blue-300 text-xs font-bold uppercase tracking-wider">Academic Portal Overview</span>
           <h2 className="text-2xl md:text-3xl font-black text-white">
-            Dashboard Overview
+            System Dashboard
           </h2>
           <p className="text-blue-100 text-sm max-w-xl">
-            Welcome to the academic management portal. Use the sidebar menu to navigate to your dedicated modules.
+            Welcome to Odros University Portal. Use the sidebar to access dedicated pages. Use the sidebar top toggle button to minimize or expand the menu bar.
           </p>
         </div>
+      </div>
+
+      {/* Demo & Section Explanation Banner */}
+      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
+        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
+          <Info className="h-4 w-4 text-blue-600" />
+          Feature Demo Guide: Overview & System Analytics
+        </div>
+        <p>
+          This overview tracks system-wide enrollment metrics, active course counts, and total capacity utilization. 
+          Use the left sidebar links to navigate between dedicated modules: <strong>Course Catalog</strong>, <strong>My Transcript & GPA</strong>, <strong>Attendance Tracker</strong>, <strong>Tuition & Fee Portal</strong>, <strong>Faculty Grading Portal</strong>, <strong>User Directory</strong>, and <strong>Campus Broadcasts</strong>.
+        </p>
       </div>
 
       {error && (

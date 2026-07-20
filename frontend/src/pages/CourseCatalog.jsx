@@ -17,7 +17,8 @@ import {
   Bookmark,
   Layers,
   Award,
-  Users
+  Users,
+  Info
 } from 'lucide-react';
 
 const CourseCatalog = () => {
@@ -221,6 +222,19 @@ const CourseCatalog = () => {
             Create Course
           </button>
         )}
+      </div>
+
+      {/* Demo & Section Explanation Banner */}
+      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
+        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
+          <Info className="h-4 w-4 text-blue-600" />
+          Feature Demo Guide: Course Directory & Instant Self-Enrollment
+        </div>
+        <p>
+          Students can click <strong>"Enroll"</strong> or <strong>"Drop"</strong> to register for courses in real-time. 
+          Admins can click <strong>"Create Course"</strong> or edit syllabus outlines and assign faculty professors. 
+          Use the department filter dropdown to filter courses by department.
+        </p>
       </div>
 
       {/* Alert Feedbacks */}

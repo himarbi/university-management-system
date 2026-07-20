@@ -10,7 +10,8 @@ import {
   Sparkles, 
   CheckCircle2, 
   AlertTriangle,
-  FileCheck
+  FileCheck,
+  Info
 } from 'lucide-react';
 
 const StudentTranscript = () => {
@@ -110,6 +111,18 @@ const StudentTranscript = () => {
             Print Official Transcript
           </button>
         </div>
+      </div>
+
+      {/* Demo & Section Explanation Banner */}
+      <div className="print:hidden p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
+        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
+          <Info className="h-4 w-4 text-blue-600" />
+          Feature Demo Guide: Academic Transcript & Real-Time GPA Engine
+        </div>
+        <p>
+          This section calculates your **Cumulative GPA** on a standard 0.0–4.0 scale by weighting letter grades against course credit values. 
+          It automatically assigns **Academic Standing & Honors** (e.g. <em>Dean's High Honors / Summa Cum Laude</em> for GPA ≥ 3.8) and formats your transcript for print export via the <strong>Print Official Transcript</strong> button.
+        </p>
       </div>
 
       {error && (

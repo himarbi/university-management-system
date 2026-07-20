@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { feeApi, userApi } from '../services/api';
-import { CreditCard, DollarSign, CheckCircle2, AlertTriangle, Clock, Loader2, Plus, X } from 'lucide-react';
+import { CreditCard, DollarSign, CheckCircle2, AlertTriangle, Clock, Loader2, Plus, X, Info } from 'lucide-react';
 
 const FeeManager = () => {
   const { user } = useAuth();
@@ -146,6 +146,17 @@ const FeeManager = () => {
             Generate Fee Statement
           </button>
         )}
+      </div>
+
+      {/* Demo & Section Explanation Banner */}
+      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
+        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
+          <Info className="h-4 w-4 text-blue-600" />
+          Feature Demo Guide: Tuition & Fee Statement Manager
+        </div>
+        <p>
+          Students can view their itemized term fee breakdown (Tuition per credit, Lab fee, Registration fee), remaining balance, and payment status (`PAID`, `PENDING`, `OVERDUE`). Click <strong>"Make Payment"</strong> to simulate paying tuition. Admins can click <strong>"Generate Fee Statement"</strong> to bill any student account.
+        </p>
       </div>
 
       {error && (

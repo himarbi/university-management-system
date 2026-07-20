@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { attendanceApi, courseApi } from '../services/api';
-import { Calendar, CheckCircle2, XCircle, Clock, AlertCircle, Loader2, Save, Users } from 'lucide-react';
+import { Calendar, CheckCircle2, XCircle, Clock, AlertCircle, Loader2, Save, Users, Info } from 'lucide-react';
 
 const AttendanceManager = () => {
   const { user } = useAuth();
@@ -183,6 +183,20 @@ const AttendanceManager = () => {
             </select>
           </div>
         )}
+      </div>
+
+      {/* Demo & Section Explanation Banner */}
+      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
+        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
+          <Info className="h-4 w-4 text-blue-600" />
+          Feature Demo Guide: Daily Class Attendance Tracker
+        </div>
+        <p>
+          {user?.role === 'STUDENT' 
+            ? 'Students can monitor their overall class attendance rate (% Present), total logged sessions, and detailed date history across all enrolled courses.'
+            : 'Teachers can pick a date using the calendar picker, select attendance statuses (PRESENT, ABSENT, LATE, EXCUSED) for each student in the roster, and click "Save Attendance Sheet" to record daily logs.'
+          }
+        </p>
       </div>
 
       {error && (

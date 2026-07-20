@@ -39,18 +39,26 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (userRepository.count() == 0) {
-            System.out.println("Seeding authentic Somali university dataset...");
+            System.out.println("Seeding extended Somali university demo dataset...");
 
-            // 1. Create System Administrator
-            User admin = User.builder()
+            // 1. System Admins
+            User admin1 = User.builder()
                     .username("admin")
                     .email("abdirahman@university.edu.so")
                     .password(passwordEncoder.encode("admin123"))
                     .role(Role.ADMIN)
                     .build();
-            userRepository.save(admin);
+            userRepository.save(admin1);
 
-            // 2. Create Somali Faculty Professors
+            User admin2 = User.builder()
+                    .username("khadra_gure")
+                    .email("khadra.gure@university.edu.so")
+                    .password(passwordEncoder.encode("admin123"))
+                    .role(Role.ADMIN)
+                    .build();
+            userRepository.save(admin2);
+
+            // 2. Somali Faculty Professors
             User teacher1 = User.builder()
                     .username("ibrahim_ahmed")
                     .email("ibrahim.ahmed@university.edu.so")
@@ -83,7 +91,15 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             userRepository.save(teacher4);
 
-            // 3. Create Somali Student Accounts
+            User teacher5 = User.builder()
+                    .username("hassan_abdi")
+                    .email("hassan.abdi@university.edu.so")
+                    .password(passwordEncoder.encode("teacher123"))
+                    .role(Role.TEACHER)
+                    .build();
+            userRepository.save(teacher5);
+
+            // 3. Somali Student Accounts
             User student1 = User.builder()
                     .username("hamda_farah")
                     .email("hamda.farah@university.edu.so")
@@ -116,7 +132,23 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             userRepository.save(student4);
 
-            // 4. Create Real University Courses
+            User student5 = User.builder()
+                    .username("mustafa_shire")
+                    .email("mustafa.shire@university.edu.so")
+                    .password(passwordEncoder.encode("student123"))
+                    .role(Role.STUDENT)
+                    .build();
+            userRepository.save(student5);
+
+            User student6 = User.builder()
+                    .username("nimo_osman")
+                    .email("nimo.osman@university.edu.so")
+                    .password(passwordEncoder.encode("student123"))
+                    .role(Role.STUDENT)
+                    .build();
+            userRepository.save(student6);
+
+            // 4. University Courses
             Course course1 = Course.builder()
                     .courseCode("CS-101")
                     .name("Introduction to Computer Science")
@@ -125,7 +157,7 @@ public class DataInitializer implements CommandLineRunner {
                     .credits(4)
                     .maxCapacity(30)
                     .teacher(teacher1)
-                    .students(new HashSet<>(Set.of(student1, student2, student3)))
+                    .students(new HashSet<>(Set.of(student1, student2, student3, student5)))
                     .build();
             courseRepository.save(course1);
 
@@ -137,7 +169,7 @@ public class DataInitializer implements CommandLineRunner {
                     .credits(3)
                     .maxCapacity(25)
                     .teacher(teacher2)
-                    .students(new HashSet<>(Set.of(student1, student2, student4)))
+                    .students(new HashSet<>(Set.of(student1, student2, student4, student6)))
                     .build();
             courseRepository.save(course2);
 
@@ -149,7 +181,7 @@ public class DataInitializer implements CommandLineRunner {
                     .credits(3)
                     .maxCapacity(40)
                     .teacher(teacher3)
-                    .students(new HashSet<>(Set.of(student1, student3, student4)))
+                    .students(new HashSet<>(Set.of(student1, student3, student4, student6)))
                     .build();
             courseRepository.save(course3);
 
@@ -161,7 +193,7 @@ public class DataInitializer implements CommandLineRunner {
                     .credits(4)
                     .maxCapacity(35)
                     .teacher(teacher4)
-                    .students(new HashSet<>(Set.of(student2, student4)))
+                    .students(new HashSet<>(Set.of(student2, student4, student5)))
                     .build();
             courseRepository.save(course4);
 
@@ -173,54 +205,34 @@ public class DataInitializer implements CommandLineRunner {
                     .credits(3)
                     .maxCapacity(30)
                     .teacher(teacher1)
-                    .students(new HashSet<>(Set.of(student1, student3)))
+                    .students(new HashSet<>(Set.of(student1, student3, student6)))
                     .build();
             courseRepository.save(course5);
 
-            // 5. Create Evaluated Student Grades
-            gradeRepository.save(Grade.builder()
-                    .student(student1).course(course1)
-                    .letterGrade("A").numericalScore(95.0).gpaPoint(4.0)
-                    .remarks("Outstanding academic performance and flawless project delivery.")
-                    .build());
+            Course course6 = Course.builder()
+                    .courseCode("BUS-110")
+                    .name("Principles of Modern Business & Economics")
+                    .description("Fundamental concepts of microeconomics, financial accounting, and modern enterprise management.")
+                    .department("Business")
+                    .credits(3)
+                    .maxCapacity(45)
+                    .teacher(teacher5)
+                    .students(new HashSet<>(Set.of(student2, student5, student6)))
+                    .build();
+            courseRepository.save(course6);
 
-            gradeRepository.save(Grade.builder()
-                    .student(student1).course(course2)
-                    .letterGrade("A-").numericalScore(89.5).gpaPoint(3.7)
-                    .remarks("Exemplary analytical problem solving in differential calculus.")
-                    .build());
+            // 5. Evaluated Student Grades
+            gradeRepository.save(Grade.builder().student(student1).course(course1).letterGrade("A").numericalScore(95.0).gpaPoint(4.0).remarks("Outstanding academic performance and flawless project delivery.").build());
+            gradeRepository.save(Grade.builder().student(student1).course(course2).letterGrade("A-").numericalScore(89.5).gpaPoint(3.7).remarks("Exemplary analytical problem solving in differential calculus.").build());
+            gradeRepository.save(Grade.builder().student(student1).course(course3).letterGrade("A").numericalScore(97.0).gpaPoint(4.0).remarks("Exceptional mastery of software architecture and gang-of-four patterns.").build());
 
-            gradeRepository.save(Grade.builder()
-                    .student(student1).course(course3)
-                    .letterGrade("A").numericalScore(97.0).gpaPoint(4.0)
-                    .remarks("Exceptional mastery of software architecture and gang-of-four patterns.")
-                    .build());
+            gradeRepository.save(Grade.builder().student(student2).course(course1).letterGrade("B+").numericalScore(87.5).gpaPoint(3.3).remarks("Strong Java programming syntax and lab assignment execution.").build());
+            gradeRepository.save(Grade.builder().student(student2).course(course2).letterGrade("B").numericalScore(83.0).gpaPoint(3.0).remarks("Consistent performance in quizzes and calculus tutorials.").build());
 
-            gradeRepository.save(Grade.builder()
-                    .student(student2).course(course1)
-                    .letterGrade("B+").numericalScore(87.5).gpaPoint(3.3)
-                    .remarks("Strong Java programming syntax and lab assignment execution.")
-                    .build());
+            gradeRepository.save(Grade.builder().student(student3).course(course1).letterGrade("A-").numericalScore(91.5).gpaPoint(3.7).remarks("Great algorithmic comprehension and active lab participation.").build());
+            gradeRepository.save(Grade.builder().student(student4).course(course4).letterGrade("A").numericalScore(96.0).gpaPoint(4.0).remarks("Top score in digital logic breadboard lab examinations.").build());
 
-            gradeRepository.save(Grade.builder()
-                    .student(student2).course(course2)
-                    .letterGrade("B").numericalScore(83.0).gpaPoint(3.0)
-                    .remarks("Consistent performance in quizzes and calculus tutorials.")
-                    .build());
-
-            gradeRepository.save(Grade.builder()
-                    .student(student3).course(course1)
-                    .letterGrade("A-").numericalScore(91.5).gpaPoint(3.7)
-                    .remarks("Great algorithmic comprehension and active lab participation.")
-                    .build());
-
-            gradeRepository.save(Grade.builder()
-                    .student(student4).course(course4)
-                    .letterGrade("A").numericalScore(96.0).gpaPoint(4.0)
-                    .remarks("Top score in digital logic breadboard lab examinations.")
-                    .build());
-
-            // 6. Create Historical Daily Attendance Logs
+            // 6. Historical Attendance Logs
             LocalDate today = LocalDate.now();
 
             attendanceRepository.save(Attendance.builder().student(student1).course(course1).date(today.minusDays(5)).status("PRESENT").remarks("On time").build());
@@ -237,97 +249,34 @@ public class DataInitializer implements CommandLineRunner {
             attendanceRepository.save(Attendance.builder().student(student4).course(course4).date(today.minusDays(3)).status("PRESENT").remarks("On time").build());
             attendanceRepository.save(Attendance.builder().student(student4).course(course4).date(today.minusDays(1)).status("PRESENT").remarks("On time").build());
 
-            // 7. Create Student Tuition Fee Statements
-            feeStatementRepository.save(FeeStatement.builder()
-                    .student(student1)
-                    .academicTerm("Fall 2026")
-                    .tuitionAmount(1600.0)
-                    .labFee(150.0)
-                    .registrationFee(100.0)
-                    .paidAmount(1850.0)
-                    .balance(0.0)
-                    .status("PAID")
-                    .dueDate(today.plusMonths(1))
-                    .build());
+            // 7. Student Tuition Fee Statements
+            feeStatementRepository.save(FeeStatement.builder().student(student1).academicTerm("Fall 2026").tuitionAmount(1600.0).labFee(150.0).registrationFee(100.0).paidAmount(1850.0).balance(0.0).status("PAID").dueDate(today.plusMonths(1)).build());
+            feeStatementRepository.save(FeeStatement.builder().student(student2).academicTerm("Fall 2026").tuitionAmount(1200.0).labFee(150.0).registrationFee(100.0).paidAmount(600.0).balance(850.0).status("PENDING").dueDate(today.plusWeeks(2)).build());
+            feeStatementRepository.save(FeeStatement.builder().student(student3).academicTerm("Fall 2026").tuitionAmount(1200.0).labFee(150.0).registrationFee(100.0).paidAmount(0.0).balance(1450.0).status("OVERDUE").dueDate(today.minusDays(5)).build());
+            feeStatementRepository.save(FeeStatement.builder().student(student4).academicTerm("Fall 2026").tuitionAmount(1400.0).labFee(150.0).registrationFee(100.0).paidAmount(1650.0).balance(0.0).status("PAID").dueDate(today.plusMonths(1)).build());
 
-            feeStatementRepository.save(FeeStatement.builder()
-                    .student(student2)
-                    .academicTerm("Fall 2026")
-                    .tuitionAmount(1200.0)
-                    .labFee(150.0)
-                    .registrationFee(100.0)
-                    .paidAmount(600.0)
-                    .balance(850.0)
-                    .status("PENDING")
-                    .dueDate(today.plusWeeks(2))
-                    .build());
-
-            feeStatementRepository.save(FeeStatement.builder()
-                    .student(student3)
-                    .academicTerm("Fall 2026")
-                    .tuitionAmount(1200.0)
-                    .labFee(150.0)
-                    .registrationFee(100.0)
-                    .paidAmount(0.0)
-                    .balance(1450.0)
-                    .status("OVERDUE")
-                    .dueDate(today.minusDays(5))
-                    .build());
-
-            feeStatementRepository.save(FeeStatement.builder()
-                    .student(student4)
-                    .academicTerm("Fall 2026")
-                    .tuitionAmount(1400.0)
-                    .labFee(150.0)
-                    .registrationFee(100.0)
-                    .paidAmount(1650.0)
-                    .balance(0.0)
-                    .status("PAID")
-                    .dueDate(today.plusMonths(1))
-                    .build());
-
-            // 8. Create Campus Announcements
+            // 8. Campus Announcements
             announcementRepository.save(Announcement.builder()
                     .title("Midterm Examination Schedule Announcement")
                     .content("The official midterm examination schedule for Fall 2026 has been published. All examinations will be conducted in the Main Academic Building. Please review room assignments.")
-                    .targetRole("ALL")
-                    .priority("URGENT")
-                    .category("EXAMS")
-                    .author(admin)
-                    .createdAt(LocalDateTime.now().minusDays(1))
-                    .build());
+                    .targetRole("ALL").priority("URGENT").category("EXAMS").author(admin1).createdAt(LocalDateTime.now().minusDays(1)).build());
 
             announcementRepository.save(Announcement.builder()
                     .title("Faculty Grade Submission Deadline")
                     .content("All faculty members are required to submit midterm progress grades via the Faculty Grading Portal by next Friday at 5:00 PM.")
-                    .targetRole("TEACHER")
-                    .priority("HIGH")
-                    .category("ACADEMIC")
-                    .author(admin)
-                    .createdAt(LocalDateTime.now().minusDays(2))
-                    .build());
+                    .targetRole("TEACHER").priority("HIGH").category("ACADEMIC").author(admin1).createdAt(LocalDateTime.now().minusDays(2)).build());
 
             announcementRepository.save(Announcement.builder()
                     .title("Financial Aid & Scholarship Renewal Notice")
                     .content("Students holding merit scholarships or university financial aid must submit their renewal documentation to the Bursar's Office before the end of the month.")
-                    .targetRole("STUDENT")
-                    .priority("NORMAL")
-                    .category("GENERAL")
-                    .author(admin)
-                    .createdAt(LocalDateTime.now().minusDays(3))
-                    .build());
+                    .targetRole("STUDENT").priority("NORMAL").category("GENERAL").author(admin1).createdAt(LocalDateTime.now().minusDays(3)).build());
 
             announcementRepository.save(Announcement.builder()
                     .title("Extended Campus Library Hours During Finals")
                     .content("The Odros University Library will remain open 24/7 starting next Monday to support students preparing for end-of-term projects and exams.")
-                    .targetRole("ALL")
-                    .priority("NORMAL")
-                    .category("CAMPUS_LIFE")
-                    .author(admin)
-                    .createdAt(LocalDateTime.now().minusDays(4))
-                    .build());
+                    .targetRole("ALL").priority("NORMAL").category("CAMPUS_LIFE").author(admin1).createdAt(LocalDateTime.now().minusDays(4)).build());
 
-            System.out.println("Authentic Somali university dataset seeded successfully!");
+            System.out.println("Extended Somali university demo dataset seeded successfully!");
         } else {
             System.out.println("Database already contains data. Skipping initialization.");
         }

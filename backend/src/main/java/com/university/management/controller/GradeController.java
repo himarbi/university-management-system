@@ -1,9 +1,6 @@
 package com.university.management.controller;
 
-import com.university.management.dto.GradeDto;
-import com.university.management.dto.GradeSubmissionDto;
-import com.university.management.dto.TranscriptDto;
-import com.university.management.dto.UserDto;
+import com.university.management.dto.*;
 import com.university.management.model.Course;
 import com.university.management.model.Grade;
 import com.university.management.model.Role;
@@ -109,9 +106,81 @@ public class GradeController {
         return ResponseEntity.ok(gradeDtos);
     }
 
+    @GetMapping("/course/{courseId}/stats")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<?> getCourseClassStats(@PathVariable Long courseId) {
+        Optional<Course> courseOpt = courseRepository.findById(courseId);
+        if (courseOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        Course course = courseOpt.get();
+        List<Grade> grades = gradeRepository.findByCourseId(courseId);
+
+        if (grades.isEmpty()) {
+            ClassStatsDto emptyStats = ClassStatsDto.builder()
+                    .courseId(course.getId())
+                    .courseCode(course.getCourseCode())
+                    .courseName(course.getName())
+                    .totalGraded(0)
+                    .averageScore(0.0)
+                    .highestScore(0.0)
+                    .lowestScore(0.0)
+                    .passRatePercentage(0.0)
+                    .build();
+            return ResponseEntity.ok(emptyStats);
+        }
+
+        double sum = 0.0;
+        double max = Double.MIN_VALUE;
+        double min = Double.MAX_VALUE;
+        int passCount = 0;
+
+        for (Grade g : grades) {
+            double score = g.getNumericalScore() != null ? g.getNumericalScore() : 0.0;
+            sum += score;
+            if (score > max) max = score;
+            if (score < min) min = score;
+            if (!"F".equalsIgnoreCase(g.getLetterGrade())) {
+                passCount++;
+            }
+        }
+
+        double avg = Math.round((sum / grades.size()) * 10.0) / 10.0;
+        double passRate = Math.round(((double) passCount / grades.size() * 100.0) * 10.0) / 10.0;
+
+        ClassStatsDto stats = ClassStatsDto.builder()
+                .courseId(course.getId())
+                .courseCode(course.getCourseCode())
+                .courseName(course.getName())
+                .totalGraded(grades.size())
+                .averageScore(avg)
+                .highestScore(max == Double.MIN_VALUE ? 0.0 : max)
+                .lowestScore(min == Double.MAX_VALUE ? 0.0 : min)
+                .passRatePercentage(passRate)
+                .build();
+
+        return ResponseEntity.ok(stats);
+    }
+
     @PostMapping("/submit")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
     public ResponseEntity<?> submitGrade(@Valid @RequestBody GradeSubmissionDto submission) {
+        return processGradeSubmission(submission);
+    }
+
+    @PostMapping("/submit-bulk")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<?> submitBulkGrades(@Valid @RequestBody List<GradeSubmissionDto> submissions) {
+        List<GradeDto> savedGrades = new ArrayList<>();
+        for (GradeSubmissionDto dto : submissions) {
+            ResponseEntity<?> response = processGradeSubmission(dto);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() instanceof GradeDto) {
+                savedGrades.add((GradeDto) response.getBody());
+            }
+        }
+        return ResponseEntity.ok(savedGrades);
+    }
+
+    private ResponseEntity<?> processGradeSubmission(GradeSubmissionDto submission) {
         Optional<Course> courseOpt = courseRepository.findById(submission.getCourseId());
         if (courseOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Error: Course not found!");

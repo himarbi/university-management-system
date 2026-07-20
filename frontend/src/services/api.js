@@ -61,7 +61,9 @@ export const analyticsApi = {
 export const gradeApi = {
   getTranscript: (studentId) => api.get(`/grades/transcript${studentId ? `?studentId=${studentId}` : ''}`),
   getCourseGrades: (courseId) => api.get(`/grades/course/${courseId}`),
+  getCourseStats: (courseId) => api.get(`/grades/course/${courseId}/stats`),
   submitGrade: (data) => api.post('/grades/submit', data),
+  submitBulkGrades: (data) => api.post('/grades/submit-bulk', data),
 };
 
 export const announcementApi = {

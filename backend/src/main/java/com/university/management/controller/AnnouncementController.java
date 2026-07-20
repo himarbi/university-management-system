@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,11 @@ public class AnnouncementController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public List<AnnouncementDto> getAllAnnouncements() {
         return announcementRepository.findAllByOrderByCreatedAtDesc().stream()
+                .sorted(Comparator.comparingInt((Announcement a) -> {
+                    if ("URGENT".equalsIgnoreCase(a.getPriority())) return 0;
+                    if ("HIGH".equalsIgnoreCase(a.getPriority())) return 1;
+                    return 2;
+                }).thenComparing(Announcement::getCreatedAt, Comparator.reverseOrder()))
                 .map(AnnouncementDto::build)
                 .collect(Collectors.toList());
     }
@@ -49,6 +55,8 @@ public class AnnouncementController {
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .targetRole(dto.getTargetRole() != null ? dto.getTargetRole() : "ALL")
+                .priority(dto.getPriority() != null ? dto.getPriority() : "NORMAL")
+                .category(dto.getCategory() != null ? dto.getCategory() : "GENERAL")
                 .author(currentUser)
                 .createdAt(LocalDateTime.now())
                 .build();

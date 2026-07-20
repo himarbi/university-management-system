@@ -35,6 +35,16 @@ public class Announcement {
     @Builder.Default
     private String targetRole = "ALL"; // ALL, STUDENT, TEACHER
 
+    @NotBlank
+    @Column(nullable = false)
+    @Builder.Default
+    private String priority = "NORMAL"; // URGENT, HIGH, NORMAL
+
+    @NotBlank
+    @Column(nullable = false)
+    @Builder.Default
+    private String category = "GENERAL"; // ACADEMIC, EXAMS, EMERGENCY, CAMPUS_LIFE, GENERAL
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id")
     private User author;

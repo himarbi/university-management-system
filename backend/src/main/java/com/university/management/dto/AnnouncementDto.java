@@ -24,6 +24,8 @@ public class AnnouncementDto {
     private String content;
 
     private String targetRole; // ALL, STUDENT, TEACHER
+    private String priority; // URGENT, HIGH, NORMAL
+    private String category; // ACADEMIC, EXAMS, EMERGENCY, CAMPUS_LIFE, GENERAL
     private UserDto author;
     private String createdAt;
 
@@ -34,7 +36,9 @@ public class AnnouncementDto {
                 .id(announcement.getId())
                 .title(announcement.getTitle())
                 .content(announcement.getContent())
-                .targetRole(announcement.getTargetRole())
+                .targetRole(announcement.getTargetRole() != null ? announcement.getTargetRole() : "ALL")
+                .priority(announcement.getPriority() != null ? announcement.getPriority() : "NORMAL")
+                .category(announcement.getCategory() != null ? announcement.getCategory() : "GENERAL")
                 .author(UserDto.build(announcement.getAuthor()))
                 .createdAt(announcement.getCreatedAt() != null ? announcement.getCreatedAt().format(formatter) : null)
                 .build();

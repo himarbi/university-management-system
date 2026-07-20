@@ -1,0 +1,17 @@
+# Dependencies & Build Outputs
+node_modules/
+target/
+dist/
+build/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE & Editor files
+.idea/
+*.iml
+.DS_Store
+Thumbs.db

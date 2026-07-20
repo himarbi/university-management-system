@@ -123,13 +123,15 @@ npm run dev
 
 ---
 
-## 🔑 Pre-Seeded Test Credentials
+## 🔑 Pre-Seeded Somali Test Credentials
 
-| Username | Password | Role | Access Rights |
+| Username | Password | Role | User Description |
 | :--- | :--- | :--- | :--- |
-| `admin` | `admin123` | `ROLE_ADMIN` | Full System Oversight, Fee Generation, User Directory & Announcements |
-| `john_doe` | `teacher123` | `ROLE_TEACHER` | Faculty Grading Portal (`/grading`), Daily Attendance Sheet (`/attendance`) |
-| `alice_jones` | `student123` | `ROLE_STUDENT` | Official Transcript (`/transcript`), Attendance Tracker (`/attendance`), Fee Statement (`/fees`) |
+| `admin` | `admin123` | `ROLE_ADMIN` | System Administrator (`abdirahman@university.edu.so`) |
+| `ibrahim_ahmed` | `teacher123` | `ROLE_TEACHER` | Prof. Ibrahim A. Ahmed (Computer Science Department) |
+| `fatima_jama` | `teacher123` | `ROLE_TEACHER` | Dr. Fatima Abdi Jama (Mathematics Department) |
+| `hamda_farah` | `student123` | `ROLE_STUDENT` | Hamda Farah Abdi (Senior Student - High Honors) |
+| `bilal_warsame` | `student123` | `ROLE_STUDENT` | Bilal Ahmed Warsame (Junior Student) |
 
 ---
 

@@ -39,78 +39,78 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (userRepository.count() == 0) {
-            System.out.println("Seeding comprehensive real-world university dataset...");
+            System.out.println("Seeding authentic Somali university dataset...");
 
             // 1. Create System Administrator
             User admin = User.builder()
                     .username("admin")
-                    .email("admin@university.com")
+                    .email("abdirahman@university.edu.so")
                     .password(passwordEncoder.encode("admin123"))
                     .role(Role.ADMIN)
                     .build();
             userRepository.save(admin);
 
-            // 2. Create Faculty Professors
+            // 2. Create Somali Faculty Professors
             User teacher1 = User.builder()
-                    .username("john_doe")
-                    .email("john.doe@university.com")
+                    .username("ibrahim_ahmed")
+                    .email("ibrahim.ahmed@university.edu.so")
                     .password(passwordEncoder.encode("teacher123"))
                     .role(Role.TEACHER)
                     .build();
             userRepository.save(teacher1);
 
             User teacher2 = User.builder()
-                    .username("jane_smith")
-                    .email("jane.smith@university.com")
+                    .username("fatima_jama")
+                    .email("fatima.jama@university.edu.so")
                     .password(passwordEncoder.encode("teacher123"))
                     .role(Role.TEACHER)
                     .build();
             userRepository.save(teacher2);
 
             User teacher3 = User.builder()
-                    .username("robert_brown")
-                    .email("robert.brown@university.com")
+                    .username("mohamed_hassan")
+                    .email("mohamed.hassan@university.edu.so")
                     .password(passwordEncoder.encode("teacher123"))
                     .role(Role.TEACHER)
                     .build();
             userRepository.save(teacher3);
 
             User teacher4 = User.builder()
-                    .username("emily_davis")
-                    .email("emily.davis@university.com")
+                    .username("amina_yusuf")
+                    .email("amina.yusuf@university.edu.so")
                     .password(passwordEncoder.encode("teacher123"))
                     .role(Role.TEACHER)
                     .build();
             userRepository.save(teacher4);
 
-            // 3. Create Student Accounts
+            // 3. Create Somali Student Accounts
             User student1 = User.builder()
-                    .username("alice_jones")
-                    .email("alice@university.com")
+                    .username("hamda_farah")
+                    .email("hamda.farah@university.edu.so")
                     .password(passwordEncoder.encode("student123"))
                     .role(Role.STUDENT)
                     .build();
             userRepository.save(student1);
 
             User student2 = User.builder()
-                    .username("bob_miller")
-                    .email("bob@university.com")
+                    .username("bilal_warsame")
+                    .email("bilal.warsame@university.edu.so")
                     .password(passwordEncoder.encode("student123"))
                     .role(Role.STUDENT)
                     .build();
             userRepository.save(student2);
 
             User student3 = User.builder()
-                    .username("charlie_wilson")
-                    .email("charlie@university.com")
+                    .username("zakaria_aden")
+                    .email("zakaria.aden@university.edu.so")
                     .password(passwordEncoder.encode("student123"))
                     .role(Role.STUDENT)
                     .build();
             userRepository.save(student3);
 
             User student4 = User.builder()
-                    .username("diana_prince")
-                    .email("diana@university.com")
+                    .username("hawa_dahir")
+                    .email("hawa.dahir@university.edu.so")
                     .password(passwordEncoder.encode("student123"))
                     .role(Role.STUDENT)
                     .build();
@@ -180,43 +180,43 @@ public class DataInitializer implements CommandLineRunner {
             // 5. Create Evaluated Student Grades
             gradeRepository.save(Grade.builder()
                     .student(student1).course(course1)
-                    .letterGrade("A").numericalScore(94.5).gpaPoint(4.0)
+                    .letterGrade("A").numericalScore(95.0).gpaPoint(4.0)
                     .remarks("Outstanding academic performance and flawless project delivery.")
                     .build());
 
             gradeRepository.save(Grade.builder()
                     .student(student1).course(course2)
-                    .letterGrade("A-").numericalScore(89.0).gpaPoint(3.7)
+                    .letterGrade("A-").numericalScore(89.5).gpaPoint(3.7)
                     .remarks("Exemplary analytical problem solving in differential calculus.")
                     .build());
 
             gradeRepository.save(Grade.builder()
                     .student(student1).course(course3)
-                    .letterGrade("A").numericalScore(96.0).gpaPoint(4.0)
+                    .letterGrade("A").numericalScore(97.0).gpaPoint(4.0)
                     .remarks("Exceptional mastery of software architecture and gang-of-four patterns.")
                     .build());
 
             gradeRepository.save(Grade.builder()
                     .student(student2).course(course1)
-                    .letterGrade("B+").numericalScore(87.0).gpaPoint(3.3)
+                    .letterGrade("B+").numericalScore(87.5).gpaPoint(3.3)
                     .remarks("Strong Java programming syntax and lab assignment execution.")
                     .build());
 
             gradeRepository.save(Grade.builder()
                     .student(student2).course(course2)
-                    .letterGrade("B").numericalScore(83.5).gpaPoint(3.0)
+                    .letterGrade("B").numericalScore(83.0).gpaPoint(3.0)
                     .remarks("Consistent performance in quizzes and calculus tutorials.")
                     .build());
 
             gradeRepository.save(Grade.builder()
                     .student(student3).course(course1)
-                    .letterGrade("A-").numericalScore(91.0).gpaPoint(3.7)
+                    .letterGrade("A-").numericalScore(91.5).gpaPoint(3.7)
                     .remarks("Great algorithmic comprehension and active lab participation.")
                     .build());
 
             gradeRepository.save(Grade.builder()
                     .student(student4).course(course4)
-                    .letterGrade("A").numericalScore(95.5).gpaPoint(4.0)
+                    .letterGrade("A").numericalScore(96.0).gpaPoint(4.0)
                     .remarks("Top score in digital logic breadboard lab examinations.")
                     .build());
 
@@ -327,7 +327,7 @@ public class DataInitializer implements CommandLineRunner {
                     .createdAt(LocalDateTime.now().minusDays(4))
                     .build());
 
-            System.out.println("Real-world university dataset seeded successfully!");
+            System.out.println("Authentic Somali university dataset seeded successfully!");
         } else {
             System.out.println("Database already contains data. Skipping initialization.");
         }

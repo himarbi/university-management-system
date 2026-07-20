@@ -39,9 +39,9 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (userRepository.count() == 0) {
-            System.out.println("No users found. Seeding initial data...");
+            System.out.println("Seeding comprehensive real-world university dataset...");
 
-            // Create Admin
+            // 1. Create System Administrator
             User admin = User.builder()
                     .username("admin")
                     .email("admin@university.com")
@@ -50,7 +50,7 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             userRepository.save(admin);
 
-            // Create Teachers
+            // 2. Create Faculty Professors
             User teacher1 = User.builder()
                     .username("john_doe")
                     .email("john.doe@university.com")
@@ -67,7 +67,23 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             userRepository.save(teacher2);
 
-            // Create Students
+            User teacher3 = User.builder()
+                    .username("robert_brown")
+                    .email("robert.brown@university.com")
+                    .password(passwordEncoder.encode("teacher123"))
+                    .role(Role.TEACHER)
+                    .build();
+            userRepository.save(teacher3);
+
+            User teacher4 = User.builder()
+                    .username("emily_davis")
+                    .email("emily.davis@university.com")
+                    .password(passwordEncoder.encode("teacher123"))
+                    .role(Role.TEACHER)
+                    .build();
+            userRepository.save(teacher4);
+
+            // 3. Create Student Accounts
             User student1 = User.builder()
                     .username("alice_jones")
                     .email("alice@university.com")
@@ -84,128 +100,182 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             userRepository.save(student2);
 
-            // Create Courses
+            User student3 = User.builder()
+                    .username("charlie_wilson")
+                    .email("charlie@university.com")
+                    .password(passwordEncoder.encode("student123"))
+                    .role(Role.STUDENT)
+                    .build();
+            userRepository.save(student3);
+
+            User student4 = User.builder()
+                    .username("diana_prince")
+                    .email("diana@university.com")
+                    .password(passwordEncoder.encode("student123"))
+                    .role(Role.STUDENT)
+                    .build();
+            userRepository.save(student4);
+
+            // 4. Create Real University Courses
             Course course1 = Course.builder()
                     .courseCode("CS-101")
                     .name("Introduction to Computer Science")
-                    .description("Learn the fundamentals of computer programming using Java, algorithmic thinking, and problem solving.")
+                    .description("Learn the fundamentals of computer programming using Java, object-oriented design, and algorithmic thinking.")
                     .department("Computer Science")
                     .credits(4)
                     .maxCapacity(30)
                     .teacher(teacher1)
-                    .students(new HashSet<>(Set.of(student1)))
+                    .students(new HashSet<>(Set.of(student1, student2, student3)))
                     .build();
             courseRepository.save(course1);
 
             Course course2 = Course.builder()
                     .courseCode("MATH-201")
                     .name("Calculus II")
-                    .description("Covers integration, applications of integration, differential equations, sequences, and series.")
+                    .description("Advanced calculus covering integration techniques, differential equations, sequences, and infinite series.")
                     .department("Mathematics")
                     .credits(3)
                     .maxCapacity(25)
                     .teacher(teacher2)
-                    .students(new HashSet<>(Set.of(student1, student2)))
+                    .students(new HashSet<>(Set.of(student1, student2, student4)))
                     .build();
             courseRepository.save(course2);
 
             Course course3 = Course.builder()
                     .courseCode("SWE-310")
-                    .name("Software Engineering Practices")
-                    .description("Introductory course on software design patterns, agile workflows, version control, and testing frameworks.")
+                    .name("Software Architecture & Design Patterns")
+                    .description("Comprehensive guide to enterprise software design patterns, microservices architecture, and code clean principles.")
                     .department("Software Engineering")
                     .credits(3)
                     .maxCapacity(40)
-                    .teacher(teacher1)
-                    .students(new HashSet<>())
+                    .teacher(teacher3)
+                    .students(new HashSet<>(Set.of(student1, student3, student4)))
                     .build();
             courseRepository.save(course3);
 
-            // Create Initial Grades
-            Grade grade1 = Grade.builder()
-                    .student(student1)
-                    .course(course1)
-                    .letterGrade("A")
-                    .numericalScore(94.5)
-                    .gpaPoint(4.0)
-                    .remarks("Outstanding academic performance and project execution.")
+            Course course4 = Course.builder()
+                    .courseCode("EE-220")
+                    .name("Digital Logic Circuits & Systems")
+                    .description("Explores digital logic gates, Boolean algebra, combinational logic design, and microcontroller hardware programming.")
+                    .department("Electrical Engineering")
+                    .credits(4)
+                    .maxCapacity(35)
+                    .teacher(teacher4)
+                    .students(new HashSet<>(Set.of(student2, student4)))
                     .build();
-            gradeRepository.save(grade1);
+            courseRepository.save(course4);
 
-            Grade grade2 = Grade.builder()
-                    .student(student1)
-                    .course(course2)
-                    .letterGrade("A-")
-                    .numericalScore(89.0)
-                    .gpaPoint(3.7)
-                    .remarks("Great problem solving skills in midterms and finals.")
+            Course course5 = Course.builder()
+                    .courseCode("CS-402")
+                    .name("Artificial Intelligence & Machine Learning")
+                    .description("Study supervised and unsupervised machine learning models, neural networks, and natural language processing.")
+                    .department("Computer Science")
+                    .credits(3)
+                    .maxCapacity(30)
+                    .teacher(teacher1)
+                    .students(new HashSet<>(Set.of(student1, student3)))
                     .build();
-            gradeRepository.save(grade2);
+            courseRepository.save(course5);
 
-            Grade grade3 = Grade.builder()
+            // 5. Create Evaluated Student Grades
+            gradeRepository.save(Grade.builder()
+                    .student(student1).course(course1)
+                    .letterGrade("A").numericalScore(94.5).gpaPoint(4.0)
+                    .remarks("Outstanding academic performance and flawless project delivery.")
+                    .build());
+
+            gradeRepository.save(Grade.builder()
+                    .student(student1).course(course2)
+                    .letterGrade("A-").numericalScore(89.0).gpaPoint(3.7)
+                    .remarks("Exemplary analytical problem solving in differential calculus.")
+                    .build());
+
+            gradeRepository.save(Grade.builder()
+                    .student(student1).course(course3)
+                    .letterGrade("A").numericalScore(96.0).gpaPoint(4.0)
+                    .remarks("Exceptional mastery of software architecture and gang-of-four patterns.")
+                    .build());
+
+            gradeRepository.save(Grade.builder()
+                    .student(student2).course(course1)
+                    .letterGrade("B+").numericalScore(87.0).gpaPoint(3.3)
+                    .remarks("Strong Java programming syntax and lab assignment execution.")
+                    .build());
+
+            gradeRepository.save(Grade.builder()
+                    .student(student2).course(course2)
+                    .letterGrade("B").numericalScore(83.5).gpaPoint(3.0)
+                    .remarks("Consistent performance in quizzes and calculus tutorials.")
+                    .build());
+
+            gradeRepository.save(Grade.builder()
+                    .student(student3).course(course1)
+                    .letterGrade("A-").numericalScore(91.0).gpaPoint(3.7)
+                    .remarks("Great algorithmic comprehension and active lab participation.")
+                    .build());
+
+            gradeRepository.save(Grade.builder()
+                    .student(student4).course(course4)
+                    .letterGrade("A").numericalScore(95.5).gpaPoint(4.0)
+                    .remarks("Top score in digital logic breadboard lab examinations.")
+                    .build());
+
+            // 6. Create Historical Daily Attendance Logs
+            LocalDate today = LocalDate.now();
+
+            attendanceRepository.save(Attendance.builder().student(student1).course(course1).date(today.minusDays(5)).status("PRESENT").remarks("On time").build());
+            attendanceRepository.save(Attendance.builder().student(student1).course(course1).date(today.minusDays(3)).status("PRESENT").remarks("On time").build());
+            attendanceRepository.save(Attendance.builder().student(student1).course(course1).date(today.minusDays(1)).status("PRESENT").remarks("On time").build());
+
+            attendanceRepository.save(Attendance.builder().student(student2).course(course2).date(today.minusDays(4)).status("PRESENT").remarks("On time").build());
+            attendanceRepository.save(Attendance.builder().student(student2).course(course2).date(today.minusDays(2)).status("LATE").remarks("Arrived 10 mins late").build());
+            attendanceRepository.save(Attendance.builder().student(student2).course(course2).date(today.minusDays(1)).status("PRESENT").remarks("On time").build());
+
+            attendanceRepository.save(Attendance.builder().student(student3).course(course3).date(today.minusDays(4)).status("PRESENT").remarks("Active participant").build());
+            attendanceRepository.save(Attendance.builder().student(student3).course(course3).date(today.minusDays(2)).status("EXCUSED").remarks("Medical slip provided").build());
+
+            attendanceRepository.save(Attendance.builder().student(student4).course(course4).date(today.minusDays(3)).status("PRESENT").remarks("On time").build());
+            attendanceRepository.save(Attendance.builder().student(student4).course(course4).date(today.minusDays(1)).status("PRESENT").remarks("On time").build());
+
+            // 7. Create Student Tuition Fee Statements
+            feeStatementRepository.save(FeeStatement.builder()
+                    .student(student1)
+                    .academicTerm("Fall 2026")
+                    .tuitionAmount(1600.0)
+                    .labFee(150.0)
+                    .registrationFee(100.0)
+                    .paidAmount(1850.0)
+                    .balance(0.0)
+                    .status("PAID")
+                    .dueDate(today.plusMonths(1))
+                    .build());
+
+            feeStatementRepository.save(FeeStatement.builder()
                     .student(student2)
-                    .course(course2)
-                    .letterGrade("B+")
-                    .numericalScore(86.5)
-                    .gpaPoint(3.3)
-                    .remarks("Solid coursework and active tutorial participation.")
-                    .build();
-            gradeRepository.save(grade3);
+                    .academicTerm("Fall 2026")
+                    .tuitionAmount(1200.0)
+                    .labFee(150.0)
+                    .registrationFee(100.0)
+                    .paidAmount(600.0)
+                    .balance(850.0)
+                    .status("PENDING")
+                    .dueDate(today.plusWeeks(2))
+                    .build());
 
-            // Create Initial Announcements
-            Announcement ann1 = Announcement.builder()
-                    .title("Welcome to Fall Academic Semester 2026")
-                    .content("Welcome all students and faculty! Course registration is now active. Please check your assigned schedules and department requirements.")
-                    .targetRole("ALL")
-                    .priority("HIGH")
-                    .category("ACADEMIC")
-                    .author(admin)
-                    .createdAt(LocalDateTime.now().minusDays(2))
-                    .build();
-            announcementRepository.save(ann1);
+            feeStatementRepository.save(FeeStatement.builder()
+                    .student(student3)
+                    .academicTerm("Fall 2026")
+                    .tuitionAmount(1200.0)
+                    .labFee(150.0)
+                    .registrationFee(100.0)
+                    .paidAmount(0.0)
+                    .balance(1450.0)
+                    .status("OVERDUE")
+                    .dueDate(today.minusDays(5))
+                    .build());
 
-            Announcement ann2 = Announcement.builder()
-                    .title("Midterm Grade Submission Deadline")
-                    .content("All faculty members are requested to finalize midterm grade entries via the Faculty Grading Portal by next Friday.")
-                    .targetRole("TEACHER")
-                    .priority("URGENT")
-                    .category("EXAMS")
-                    .author(admin)
-                    .createdAt(LocalDateTime.now().minusDays(1))
-                    .build();
-            announcementRepository.save(ann2);
-
-            // Create Attendance Initial Data
-            Attendance att1 = Attendance.builder()
-                    .student(student1)
-                    .course(course1)
-                    .date(LocalDate.now().minusDays(3))
-                    .status("PRESENT")
-                    .remarks("On time")
-                    .build();
-            attendanceRepository.save(att1);
-
-            Attendance att2 = Attendance.builder()
-                    .student(student1)
-                    .course(course1)
-                    .date(LocalDate.now().minusDays(1))
-                    .status("PRESENT")
-                    .remarks("On time")
-                    .build();
-            attendanceRepository.save(att2);
-
-            Attendance att3 = Attendance.builder()
-                    .student(student2)
-                    .course(course2)
-                    .date(LocalDate.now().minusDays(2))
-                    .status("LATE")
-                    .remarks("Arrived 10 minutes late")
-                    .build();
-            attendanceRepository.save(att3);
-
-            // Create Fee Statement Initial Data
-            FeeStatement fee1 = FeeStatement.builder()
-                    .student(student1)
+            feeStatementRepository.save(FeeStatement.builder()
+                    .student(student4)
                     .academicTerm("Fall 2026")
                     .tuitionAmount(1400.0)
                     .labFee(150.0)
@@ -213,26 +283,53 @@ public class DataInitializer implements CommandLineRunner {
                     .paidAmount(1650.0)
                     .balance(0.0)
                     .status("PAID")
-                    .dueDate(LocalDate.now().plusMonths(1))
-                    .build();
-            feeStatementRepository.save(fee1);
+                    .dueDate(today.plusMonths(1))
+                    .build());
 
-            FeeStatement fee2 = FeeStatement.builder()
-                    .student(student2)
-                    .academicTerm("Fall 2026")
-                    .tuitionAmount(1200.0)
-                    .labFee(150.0)
-                    .registrationFee(100.0)
-                    .paidAmount(500.0)
-                    .balance(950.0)
-                    .status("PENDING")
-                    .dueDate(LocalDate.now().plusWeeks(2))
-                    .build();
-            feeStatementRepository.save(fee2);
+            // 8. Create Campus Announcements
+            announcementRepository.save(Announcement.builder()
+                    .title("Midterm Examination Schedule Announcement")
+                    .content("The official midterm examination schedule for Fall 2026 has been published. All examinations will be conducted in the Main Academic Building. Please review room assignments.")
+                    .targetRole("ALL")
+                    .priority("URGENT")
+                    .category("EXAMS")
+                    .author(admin)
+                    .createdAt(LocalDateTime.now().minusDays(1))
+                    .build());
 
-            System.out.println("Data seeding complete!");
+            announcementRepository.save(Announcement.builder()
+                    .title("Faculty Grade Submission Deadline")
+                    .content("All faculty members are required to submit midterm progress grades via the Faculty Grading Portal by next Friday at 5:00 PM.")
+                    .targetRole("TEACHER")
+                    .priority("HIGH")
+                    .category("ACADEMIC")
+                    .author(admin)
+                    .createdAt(LocalDateTime.now().minusDays(2))
+                    .build());
+
+            announcementRepository.save(Announcement.builder()
+                    .title("Financial Aid & Scholarship Renewal Notice")
+                    .content("Students holding merit scholarships or university financial aid must submit their renewal documentation to the Bursar's Office before the end of the month.")
+                    .targetRole("STUDENT")
+                    .priority("NORMAL")
+                    .category("GENERAL")
+                    .author(admin)
+                    .createdAt(LocalDateTime.now().minusDays(3))
+                    .build());
+
+            announcementRepository.save(Announcement.builder()
+                    .title("Extended Campus Library Hours During Finals")
+                    .content("The Odros University Library will remain open 24/7 starting next Monday to support students preparing for end-of-term projects and exams.")
+                    .targetRole("ALL")
+                    .priority("NORMAL")
+                    .category("CAMPUS_LIFE")
+                    .author(admin)
+                    .createdAt(LocalDateTime.now().minusDays(4))
+                    .build());
+
+            System.out.println("Real-world university dataset seeded successfully!");
         } else {
-            System.out.println("Users already exist. Skipping data seeding.");
+            System.out.println("Database already contains data. Skipping initialization.");
         }
     }
 }

@@ -174,4 +174,3 @@ npm run dev
 ## 📜 License & Author
 
 - **Author**: [Ibrahim A. Ahmed (himarbi)](https://github.com/himarbi)
-- **Repository**: [https://github.com/himarbi/university-management-system](https://github.com/himarbi/university-management-system)

@@ -6,12 +6,15 @@ import com.university.management.model.Role;
 import com.university.management.model.User;
 import com.university.management.repository.CourseRepository;
 import com.university.management.repository.UserRepository;
+import com.university.management.repository.AttendanceRepository;
+import com.university.management.repository.GradeRepository;
 import com.university.management.security.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +31,12 @@ public class CourseController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private GradeRepository gradeRepository;
+
     private User getCurrentUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userRepository.findById(userDetails.getId()).orElseThrow(() -> new RuntimeException("Current user not found"));
@@ -37,8 +46,28 @@ public class CourseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public List<CourseDto> getAllCourses(@RequestParam(required = false) String search,
                                          @RequestParam(required = false) String department) {
+        User currentUser = getCurrentUser();
         return courseRepository.findAll().stream()
                 .filter(course -> {
+                    // 1. Teachers can only see courses that concern them (they are the assigned teacher)
+                    if (currentUser.getRole() == Role.TEACHER) {
+                        if (course.getTeacher() == null || !course.getTeacher().getId().equals(currentUser.getId())) {
+                            return false;
+                        }
+                    }
+
+                    // 2. Students can only see courses from the department they are enrolled in, unless already enrolled in them
+                    if (currentUser.getRole() == Role.STUDENT) {
+                        boolean isSameDept = course.getDepartment() != null 
+                                && currentUser.getDepartment() != null 
+                                && course.getDepartment().equalsIgnoreCase(currentUser.getDepartment());
+                        boolean isEnrolled = course.getStudents() != null 
+                                && course.getStudents().stream().anyMatch(s -> s.getId().equals(currentUser.getId()));
+                        if (!isSameDept && !isEnrolled) {
+                            return false;
+                        }
+                    }
+
                     if (search != null && !search.isBlank()) {
                         String q = search.toLowerCase();
                         boolean matchCode = course.getCourseCode() != null && course.getCourseCode().toLowerCase().contains(q);
@@ -77,10 +106,32 @@ public class CourseController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
-    public ResponseEntity<CourseDto> getCourseById(@PathVariable Long id) {
-        return courseRepository.findById(id)
-                .map(course -> ResponseEntity.ok(CourseDto.build(course)))
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> getCourseById(@PathVariable Long id) {
+        Optional<Course> courseOpt = courseRepository.findById(id);
+        if (courseOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Course course = courseOpt.get();
+        User currentUser = getCurrentUser();
+
+        if (currentUser.getRole() == Role.TEACHER) {
+            if (course.getTeacher() == null || !course.getTeacher().getId().equals(currentUser.getId())) {
+                return ResponseEntity.status(403).body("Error: You are not authorized to view this course!");
+            }
+        }
+
+        if (currentUser.getRole() == Role.STUDENT) {
+            boolean isSameDept = course.getDepartment() != null 
+                    && currentUser.getDepartment() != null 
+                    && course.getDepartment().equalsIgnoreCase(currentUser.getDepartment());
+            boolean isEnrolled = course.getStudents() != null 
+                    && course.getStudents().stream().anyMatch(s -> s.getId().equals(currentUser.getId()));
+            if (!isSameDept && !isEnrolled) {
+                return ResponseEntity.status(403).body("Error: You are not authorized to view this course!");
+            }
+        }
+
+        return ResponseEntity.ok(CourseDto.build(course));
     }
 
     @PostMapping
@@ -157,32 +208,37 @@ public class CourseController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<?> deleteCourse(@PathVariable Long id) {
         return courseRepository.findById(id).map(course -> {
+            // 1. Delete all attendances for this course
+            attendanceRepository.deleteByCourseId(course.getId());
+
+            // 2. Delete all grades for this course
+            gradeRepository.deleteByCourseId(course.getId());
+
+            // 3. Clear enrolled students to delete entries from join table
+            course.getStudents().clear();
+            courseRepository.save(course);
+
+            // 4. Finally delete the course
             courseRepository.delete(course);
             return ResponseEntity.ok("Course deleted successfully!");
         }).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}/enroll")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT')")
-    public ResponseEntity<?> enrollStudent(@PathVariable Long id, @RequestParam(required = false) Long studentId) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> enrollStudent(@PathVariable Long id, @RequestParam Long studentId) {
         return courseRepository.findById(id).map(course -> {
-            User studentToEnroll;
-            User currentUser = getCurrentUser();
-
-            if (currentUser.getRole() == Role.STUDENT) {
-                studentToEnroll = currentUser;
-            } else {
-                if (studentId == null) {
-                    return ResponseEntity.badRequest().body("Error: studentId query parameter is required for Admin!");
-                }
-                Optional<User> studentOpt = userRepository.findById(studentId);
-                if (studentOpt.isEmpty() || studentOpt.get().getRole() != Role.STUDENT) {
-                    return ResponseEntity.badRequest().body("Error: Student not found or invalid!");
-                }
-                studentToEnroll = studentOpt.get();
+            if (studentId == null) {
+                return ResponseEntity.badRequest().body("Error: studentId query parameter is required!");
             }
+            Optional<User> studentOpt = userRepository.findById(studentId);
+            if (studentOpt.isEmpty() || studentOpt.get().getRole() != Role.STUDENT) {
+                return ResponseEntity.badRequest().body("Error: Student not found or invalid!");
+            }
+            User studentToEnroll = studentOpt.get();
 
             if (course.getStudents() != null && course.getStudents().contains(studentToEnroll)) {
                 return ResponseEntity.badRequest().body("Error: Student is already enrolled in this course!");
@@ -202,24 +258,17 @@ public class CourseController {
     }
 
     @PostMapping("/{id}/unenroll")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT')")
-    public ResponseEntity<?> unenrollStudent(@PathVariable Long id, @RequestParam(required = false) Long studentId) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> unenrollStudent(@PathVariable Long id, @RequestParam Long studentId) {
         return courseRepository.findById(id).map(course -> {
-            User studentToUnenroll;
-            User currentUser = getCurrentUser();
-
-            if (currentUser.getRole() == Role.STUDENT) {
-                studentToUnenroll = currentUser;
-            } else {
-                if (studentId == null) {
-                    return ResponseEntity.badRequest().body("Error: studentId query parameter is required for Admin!");
-                }
-                Optional<User> studentOpt = userRepository.findById(studentId);
-                if (studentOpt.isEmpty() || studentOpt.get().getRole() != Role.STUDENT) {
-                    return ResponseEntity.badRequest().body("Error: Student not found or invalid!");
-                }
-                studentToUnenroll = studentOpt.get();
+            if (studentId == null) {
+                return ResponseEntity.badRequest().body("Error: studentId query parameter is required!");
             }
+            Optional<User> studentOpt = userRepository.findById(studentId);
+            if (studentOpt.isEmpty() || studentOpt.get().getRole() != Role.STUDENT) {
+                return ResponseEntity.badRequest().body("Error: Student not found or invalid!");
+            }
+            User studentToUnenroll = studentOpt.get();
 
             course.getStudents().remove(studentToUnenroll);
             courseRepository.save(course);

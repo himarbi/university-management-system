@@ -36,12 +36,24 @@ public class AnnouncementController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public List<AnnouncementDto> getAllAnnouncements() {
+        User currentUser = getCurrentUser();
+        String role = currentUser.getRole().name(); // ADMIN, TEACHER, STUDENT
+
         return announcementRepository.findAllByOrderByCreatedAtDesc().stream()
+                .filter(a -> {
+                    // Admin sees everything
+                    if ("ADMIN".equals(role)) return true;
+                    String target = a.getTargetRole() != null ? a.getTargetRole().toUpperCase() : "ALL";
+                    // Teacher sees ALL, STUDENT, and TEACHER announcements
+                    if ("TEACHER".equals(role)) return true;
+                    // Student sees only ALL and STUDENT announcements (not TEACHER)
+                    return "ALL".equals(target) || "STUDENT".equals(target);
+                })
                 .sorted(Comparator.comparingInt((Announcement a) -> {
                     if ("URGENT".equalsIgnoreCase(a.getPriority())) return 0;
                     if ("HIGH".equalsIgnoreCase(a.getPriority())) return 1;
                     return 2;
-                }).thenComparing(Announcement::getCreatedAt, Comparator.reverseOrder()))
+                }).thenComparing(a -> a.getCreatedAt(), Comparator.reverseOrder()))
                 .map(AnnouncementDto::build)
                 .collect(Collectors.toList());
     }

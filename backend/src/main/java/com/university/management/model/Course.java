@@ -63,7 +63,7 @@ public class Course {
     @JoinColumn(name = "teacher_id")
     private User teacher;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "course_students",
         joinColumns = @JoinColumn(name = "course_id"),

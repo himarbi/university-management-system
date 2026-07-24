@@ -36,7 +36,6 @@ api.interceptors.response.use(
 
 export const authApi = {
   login: (data) => api.post('/auth/login', data),
-  signup: (data) => api.post('/auth/register', data),
 };
 
 export const courseApi = {
@@ -52,6 +51,9 @@ export const courseApi = {
 
 export const userApi = {
   getAll: () => api.get('/users'),
+  create: (data) => api.post('/users', data),
+  update: (id, data) => api.put(`/users/${id}`, data),
+  delete: (id) => api.delete(`/users/${id}`),
 };
 
 export const analyticsApi = {
@@ -83,6 +85,7 @@ export const feeApi = {
   getAllStatements: () => api.get('/fees/all'),
   makePayment: (data) => api.post('/fees/pay', data),
   generateStatement: (studentId, tuitionAmount) => api.post(`/fees/generate?studentId=${studentId}&tuitionAmount=${tuitionAmount || 1200.0}`),
+  verifyPayment: (id, approve) => api.post(`/fees/${id}/verify?approve=${approve}`),
 };
 
 export default api;

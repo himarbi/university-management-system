@@ -107,9 +107,23 @@ const FeeManager = () => {
     }
   };
 
+  const handleVerifyPayment = async (statementId, approve) => {
+    setError('');
+    setSuccess('');
+    try {
+      await feeApi.verifyPayment(statementId, approve);
+      setSuccess(approve ? 'Tuition payment successfully approved and applied!' : 'Tuition payment rejected and reverted.');
+      fetchStatements();
+    } catch (err) {
+      console.error(err);
+      setError('Verification failed. Please try again.');
+    }
+  };
+
   const getStatusBadge = (status) => {
     if (status === 'PAID') return <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black border border-emerald-200"><CheckCircle2 className="h-3.5 w-3.5" /> Fully Paid</span>;
     if (status === 'OVERDUE') return <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-black border border-rose-200"><AlertTriangle className="h-3.5 w-3.5" /> Overdue</span>;
+    if (status === 'PENDING_VERIFICATION') return <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-violet-100 text-violet-800 text-xs font-black border border-violet-250 animate-pulse"><Clock className="h-3.5 w-3.5" /> Awaiting Verification</span>;
     return <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black border border-amber-200"><Clock className="h-3.5 w-3.5" /> Pending Balance</span>;
   };
 
@@ -148,16 +162,6 @@ const FeeManager = () => {
         )}
       </div>
 
-      {/* Demo & Section Explanation Banner */}
-      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
-        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
-          <Info className="h-4 w-4 text-blue-600" />
-          Feature Demo Guide: Tuition & Fee Statement Manager
-        </div>
-        <p>
-          Students can view their itemized term fee breakdown (Tuition per credit, Lab fee, Registration fee), remaining balance, and payment status (`PAID`, `PENDING`, `OVERDUE`). Click <strong>"Make Payment"</strong> to simulate paying tuition. Admins can click <strong>"Generate Fee Statement"</strong> to bill any student account.
-        </p>
-      </div>
 
       {error && (
         <div className="p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 text-sm font-medium">
@@ -213,16 +217,43 @@ const FeeManager = () => {
                     <td className="px-6 py-4 text-slate-600">${((s.labFee || 0) + (s.registrationFee || 0)).toFixed(2)}</td>
                     <td className="px-6 py-4 font-bold text-slate-900">${s.totalFee?.toFixed(2)}</td>
                     <td className="px-6 py-4 font-bold text-emerald-700">${s.paidAmount?.toFixed(2)}</td>
-                    <td className="px-6 py-4 font-black text-rose-700">${s.balance?.toFixed(2)}</td>
+                    <td className="px-6 py-4 font-black text-rose-700">
+                      ${s.balance?.toFixed(2)}
+                      {s.status === 'PENDING_VERIFICATION' && s.pendingPaymentAmount > 0 && (
+                        <div className="text-[10px] text-violet-600 font-semibold mt-0.5 animate-pulse">
+                          Pending Approval: -${s.pendingPaymentAmount?.toFixed(2)}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-6 py-4">{getStatusBadge(s.status)}</td>
                     <td className="px-6 py-4 text-right">
-                      {s.balance > 0 && (
-                        <button
-                          onClick={() => openPayModal(s)}
-                          className="px-3.5 py-1.5 rounded-lg bg-[#0f224a] hover:bg-blue-900 text-white text-xs font-bold transition-all shadow-sm"
-                        >
-                          Make Payment
-                        </button>
+                      {user?.role === 'ADMIN' && s.status === 'PENDING_VERIFICATION' ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleVerifyPayment(s.id, true)}
+                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all border border-emerald-700"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleVerifyPayment(s.id, false)}
+                            className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-all border border-rose-700"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : (
+                        s.balance > 0 && s.status !== 'PENDING_VERIFICATION' && (
+                          <button
+                            onClick={() => openPayModal(s)}
+                            className="px-3.5 py-1.5 rounded-lg bg-[#0f224a] hover:bg-blue-900 text-white text-xs font-bold transition-all shadow-sm"
+                          >
+                            Make Payment
+                          </button>
+                        )
+                      )}
+                      {user?.role === 'STUDENT' && s.status === 'PENDING_VERIFICATION' && (
+                        <span className="text-xs text-violet-700 font-bold italic">Awaiting Approval (${s.pendingPaymentAmount?.toFixed(2)})</span>
                       )}
                     </td>
                   </tr>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { courseApi, userApi } from '../services/api';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { 
   BookOpen, 
   Plus, 
@@ -40,6 +41,16 @@ const CourseCatalog = () => {
   const [modalMode, setModalMode] = useState('CREATE');
   const [selectedCourse, setSelectedCourse] = useState(null);
 
+  // Enrollment Modal States for Admin
+  const [allStudents, setAllStudents] = useState([]);
+  const [enrollModalOpen, setEnrollModalOpen] = useState(false);
+  const [enrollCourse, setEnrollCourse] = useState(null);
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+
+  // Delete confirmation state
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
   // Form Fields
   const [courseCode, setCourseCode] = useState('');
   const [name, setName] = useState('');
@@ -53,7 +64,7 @@ const CourseCatalog = () => {
   useEffect(() => {
     fetchCourses();
     if (user?.role === 'ADMIN') {
-      fetchTeachers();
+      fetchAllUsers();
     }
 
     const params = new URLSearchParams(location.search);
@@ -75,11 +86,11 @@ const CourseCatalog = () => {
     }
   };
 
-  const fetchTeachers = async () => {
+  const fetchAllUsers = async () => {
     try {
       const res = await userApi.getAll();
-      const teacherList = res.data.filter(u => u.role === 'TEACHER');
-      setTeachers(teacherList);
+      setTeachers(res.data.filter(u => u.role === 'TEACHER'));
+      setAllStudents(res.data.filter(u => u.role === 'STUDENT'));
     } catch (err) {
       console.error(err);
     }
@@ -115,15 +126,67 @@ const CourseCatalog = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this course?')) return;
+  const confirmDeleteCourse = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await courseApi.delete(id);
+      await courseApi.delete(deleteTarget.id);
       setSuccess('Course deleted successfully.');
+      setDeleteTarget(null);
       fetchCourses();
     } catch (err) {
       console.error(err);
       setError('Could not delete selected course.');
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const openEnrollmentModal = async (course) => {
+    setEnrollCourse(course);
+    setSelectedStudentId('');
+    setFieldErrors({});
+    setError('');
+    setSuccess('');
+    setEnrollModalOpen(true);
+    try {
+      const res = await userApi.getAll();
+      const students = res.data.filter(u => u.role === 'STUDENT');
+      setAllStudents(students);
+    } catch (err) {
+      console.error(err);
+      setError('Could not load student list.');
+    }
+  };
+
+  const handleAdminEnroll = async () => {
+    if (!selectedStudentId) return;
+    try {
+      setError('');
+      setSuccess('');
+      const res = await courseApi.enroll(enrollCourse.id, selectedStudentId);
+      setCourses(courses.map(c => c.id === enrollCourse.id ? res.data : c));
+      setEnrollCourse(res.data);
+      setSelectedStudentId('');
+      setSuccess('Student enrolled successfully.');
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data || 'Failed to enroll student.');
+    }
+  };
+
+  const handleAdminUnenroll = async (studentId) => {
+    try {
+      setError('');
+      setSuccess('');
+      const res = await courseApi.unenroll(enrollCourse.id, studentId);
+      setCourses(courses.map(c => c.id === enrollCourse.id ? res.data : c));
+      setEnrollCourse(res.data);
+      setSuccess('Student unenrolled successfully.');
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data || 'Failed to unenroll student.');
     }
   };
 
@@ -224,18 +287,6 @@ const CourseCatalog = () => {
         )}
       </div>
 
-      {/* Demo & Section Explanation Banner */}
-      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
-        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
-          <Info className="h-4 w-4 text-blue-600" />
-          Feature Demo Guide: Course Directory & Instant Self-Enrollment
-        </div>
-        <p>
-          Students can click <strong>"Enroll"</strong> or <strong>"Drop"</strong> to register for courses in real-time. 
-          Admins can click <strong>"Create Course"</strong> or edit syllabus outlines and assign faculty professors. 
-          Use the department filter dropdown to filter courses by department.
-        </p>
-      </div>
 
       {/* Alert Feedbacks */}
       {error && (
@@ -373,7 +424,14 @@ const CourseCatalog = () => {
                               <Edit2 className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => handleDelete(course.id)}
+                              onClick={() => openEnrollmentModal(course)}
+                              className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors"
+                              title="Manage Enrollment"
+                            >
+                              <Users className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteTarget(course)}
                               className="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 transition-colors"
                               title="Delete Course"
                             >
@@ -388,31 +446,6 @@ const CourseCatalog = () => {
                             title="Update Syllabus"
                           >
                             <Edit2 className="h-4 w-4" />
-                          </button>
-                        )}
-                        {user?.role === 'STUDENT' && (
-                          <button
-                            onClick={() => handleEnrollment(course.id, enrolled)}
-                            disabled={!enrolled && isFull}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm ${
-                              enrolled
-                                ? 'bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100'
-                                : isFull
-                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-                                : 'bg-[#0f224a] hover:bg-blue-900 text-white'
-                            }`}
-                          >
-                            {enrolled ? (
-                              <>
-                                <MinusCircle className="h-3.5 w-3.5" />
-                                Drop
-                              </>
-                            ) : (
-                              <>
-                                <PlusCircle className="h-3.5 w-3.5" />
-                                {isFull ? 'Full' : 'Enroll'}
-                              </>
-                            )}
                           </button>
                         )}
                       </div>
@@ -585,6 +618,133 @@ const CourseCatalog = () => {
           </div>
         </div>
       )}
+
+      {/* Modal - Manage Enrollment */}
+      {enrollModalOpen && enrollCourse && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-6 relative border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setEnrollModalOpen(false)}
+              className="absolute top-5 right-5 p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="space-y-1">
+              <h3 className="text-xl font-black text-[#0f224a] flex items-center gap-2">
+                <Users className="h-5 w-5 text-blue-600" />
+                Manage Course Enrollment
+              </h3>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                {enrollCourse.courseCode} — {enrollCourse.name}
+              </p>
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-lg border border-rose-200 bg-rose-50 text-rose-800 text-xs font-medium">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="p-3 rounded-lg border border-[#0f224a]/20 bg-blue-50 text-[#0f224a] text-xs font-medium">
+                {success}
+              </div>
+            )}
+
+            {/* Section 1: Enroll Student */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+              <h4 className="text-xs font-black text-[#0f224a] uppercase tracking-wider">
+                Enroll a Student
+              </h4>
+              <div className="flex gap-2">
+                <select
+                  value={selectedStudentId}
+                  onChange={(e) => setSelectedStudentId(e.target.value)}
+                  className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:border-[#0f224a] bg-white font-semibold"
+                >
+                  <option value="">-- Select Student to Enroll --</option>
+                  {allStudents
+                    .filter(student => !enrollCourse.students?.some(s => s.id === student.id))
+                    .map(student => (
+                      <option key={student.id} value={student.id}>
+                        {student.username} ({student.email}) {student.department ? `[${student.department}]` : ''}
+                      </option>
+                    ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={handleAdminEnroll}
+                  disabled={!selectedStudentId}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0f224a] hover:bg-blue-900 text-white text-xs font-bold shadow-md transition-all disabled:opacity-50"
+                >
+                  <Plus className="h-4 w-4" />
+                  Enroll
+                </button>
+              </div>
+            </div>
+
+            {/* Section 2: Enrolled Students List */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-black text-[#0f224a] uppercase tracking-wider">
+                Enrolled Students ({enrollCourse.students?.length || 0} / {enrollCourse.maxCapacity || 30})
+              </h4>
+              <div className="border border-slate-100 rounded-xl overflow-hidden divide-y divide-slate-100 max-h-[250px] overflow-y-auto bg-white">
+                {!enrollCourse.students || enrollCourse.students.length === 0 ? (
+                  <div className="p-6 text-center text-sm font-medium text-slate-400">
+                    No students currently enrolled in this course.
+                  </div>
+                ) : (
+                  enrollCourse.students.map(student => (
+                    <div key={student.id} className="p-3 flex items-center justify-between hover:bg-slate-50 transition-colors bg-white">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-slate-800">{student.username}</span>
+                          {student.department && (
+                            <span className="px-1.5 py-0.5 rounded bg-blue-50 text-[10px] font-black text-blue-700 uppercase tracking-wider">
+                              {student.department}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] font-semibold text-slate-400">{student.email}</p>
+                      </div>
+                      <button
+                        onClick={() => handleAdminUnenroll(student.id)}
+                        className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500 hover:text-rose-700 transition-colors"
+                        title="Remove Student"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setEnrollModalOpen(false)}
+                className="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDeleteCourse}
+        title="Delete Course"
+        message="This will permanently remove this course along with all enrolled students and related data. This action cannot be undone."
+        detail={deleteTarget ? `${deleteTarget.courseCode} — ${deleteTarget.name}` : ''}
+        confirmText="Delete Course"
+        variant="danger"
+        loading={deleting}
+      />
 
     </div>
   );

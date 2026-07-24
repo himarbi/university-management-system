@@ -216,17 +216,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Demo & Section Explanation Banner */}
-      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
-        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
-          <Info className="h-4 w-4 text-blue-600" />
-          Feature Demo Guide: Overview & System Analytics
-        </div>
-        <p>
-          This overview tracks system-wide enrollment metrics, active course counts, and total capacity utilization. 
-          Use the left sidebar links to navigate between dedicated modules: <strong>Course Catalog</strong>, <strong>My Transcript & GPA</strong>, <strong>Attendance Tracker</strong>, <strong>Tuition & Fee Portal</strong>, <strong>Faculty Grading Portal</strong>, <strong>User Directory</strong>, and <strong>Campus Broadcasts</strong>.
-        </p>
-      </div>
 
       {error && (
         <div className="p-4 rounded-xl border border-rose-250 bg-rose-50 text-rose-800 text-sm font-medium">

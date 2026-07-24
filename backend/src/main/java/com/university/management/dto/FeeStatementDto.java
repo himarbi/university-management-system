@@ -18,6 +18,7 @@ public class FeeStatementDto {
     private Double totalFee;
     private Double paidAmount;
     private Double balance;
+    private Double pendingPaymentAmount;
     private String status;
     private String dueDate;
 
@@ -38,6 +39,7 @@ public class FeeStatementDto {
                 .totalFee(total)
                 .paidAmount(statement.getPaidAmount())
                 .balance(statement.getBalance())
+                .pendingPaymentAmount(statement.getPendingPaymentAmount() != null ? statement.getPendingPaymentAmount() : 0.0)
                 .status(statement.getStatus())
                 .dueDate(statement.getDueDate() != null ? statement.getDueDate().toString() : null)
                 .build();

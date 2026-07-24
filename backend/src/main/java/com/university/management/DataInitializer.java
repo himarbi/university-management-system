@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -36,119 +37,60 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private User getOrCreateUser(String username, String email, String password, Role role, String department) {
+        Optional<User> existing = userRepository.findByUsername(username);
+        User user;
+        if (existing.isPresent()) {
+            user = existing.get();
+            user.setEmail(email);
+            user.setPassword(passwordEncoder.encode(password));
+            user.setRole(role);
+            user.setDepartment(department);
+        } else {
+            user = User.builder()
+                    .username(username)
+                    .email(email)
+                    .password(passwordEncoder.encode(password))
+                    .role(role)
+                    .department(department)
+                    .build();
+        }
+        return userRepository.save(user);
+    }
+
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.count() == 0) {
-            System.out.println("Seeding extended Somali university demo dataset...");
+        System.out.println("Initializing/Synchronizing Somali university demo accounts and dataset...");
 
-            // 1. System Admins
-            User admin1 = User.builder()
-                    .username("admin")
-                    .email("abdirahman@university.edu.so")
-                    .password(passwordEncoder.encode("admin123"))
-                    .role(Role.ADMIN)
-                    .build();
-            userRepository.save(admin1);
+        // Clear all repositories to totally remove previous/old users and start fresh
+        attendanceRepository.deleteAll();
+        gradeRepository.deleteAll();
+        feeStatementRepository.deleteAll();
+        announcementRepository.deleteAll();
+        courseRepository.deleteAll();
+        userRepository.deleteAll();
 
-            User admin2 = User.builder()
-                    .username("khadra_gure")
-                    .email("khadra.gure@university.edu.so")
-                    .password(passwordEncoder.encode("admin123"))
-                    .role(Role.ADMIN)
-                    .build();
-            userRepository.save(admin2);
+        // 1. System Admins (Password: admin123)
+        User admin1 = getOrCreateUser("admin", "abdirahman@odros.edu.so", "admin123", Role.ADMIN, null);
+        getOrCreateUser("khadra_gure", "khadra.gure@odros.edu.so", "admin123", Role.ADMIN, null);
 
-            // 2. Somali Faculty Professors
-            User teacher1 = User.builder()
-                    .username("ibrahim_ahmed")
-                    .email("ibrahim.ahmed@university.edu.so")
-                    .password(passwordEncoder.encode("teacher123"))
-                    .role(Role.TEACHER)
-                    .build();
-            userRepository.save(teacher1);
+        // 2. Somali Faculty Professors (Password: teacher123)
+        User teacher1 = getOrCreateUser("ibrahim_ahmed", "ibrahim.ahmed@odros.edu.so", "teacher123", Role.TEACHER, "Computer Science");
+        User teacher2 = getOrCreateUser("fatima_jama", "fatima.jama@odros.edu.so", "teacher123", Role.TEACHER, "Mathematics");
+        User teacher3 = getOrCreateUser("mohamed_hassan", "mohamed.hassan@odros.edu.so", "teacher123", Role.TEACHER, "Software Engineering");
+        User teacher4 = getOrCreateUser("amina_yusuf", "amina.yusuf@odros.edu.so", "teacher123", Role.TEACHER, "Electrical Engineering");
+        User teacher5 = getOrCreateUser("hassan_abdi", "hassan.abdi@odros.edu.so", "teacher123", Role.TEACHER, "Business");
 
-            User teacher2 = User.builder()
-                    .username("fatima_jama")
-                    .email("fatima.jama@university.edu.so")
-                    .password(passwordEncoder.encode("teacher123"))
-                    .role(Role.TEACHER)
-                    .build();
-            userRepository.save(teacher2);
+        // 3. Somali Student Accounts (Password: student123)
+        User student1 = getOrCreateUser("hamda_farah", "hamda.farah@odros.edu.so", "student123", Role.STUDENT, "Computer Science");
+        User student2 = getOrCreateUser("bilal_warsame", "bilal.warsame@odros.edu.so", "student123", Role.STUDENT, "Computer Science");
+        User student3 = getOrCreateUser("zakaria_aden", "zakaria.aden@odros.edu.so", "student123", Role.STUDENT, "Computer Science");
+        User student4 = getOrCreateUser("hawa_dahir", "hawa.dahir@odros.edu.so", "student123", Role.STUDENT, "Software Engineering");
+        User student5 = getOrCreateUser("mustafa_shire", "mustafa.shire@odros.edu.so", "student123", Role.STUDENT, "Electrical Engineering");
+        User student6 = getOrCreateUser("nimo_osman", "nimo.osman@odros.edu.so", "student123", Role.STUDENT, "Business");
 
-            User teacher3 = User.builder()
-                    .username("mohamed_hassan")
-                    .email("mohamed.hassan@university.edu.so")
-                    .password(passwordEncoder.encode("teacher123"))
-                    .role(Role.TEACHER)
-                    .build();
-            userRepository.save(teacher3);
-
-            User teacher4 = User.builder()
-                    .username("amina_yusuf")
-                    .email("amina.yusuf@university.edu.so")
-                    .password(passwordEncoder.encode("teacher123"))
-                    .role(Role.TEACHER)
-                    .build();
-            userRepository.save(teacher4);
-
-            User teacher5 = User.builder()
-                    .username("hassan_abdi")
-                    .email("hassan.abdi@university.edu.so")
-                    .password(passwordEncoder.encode("teacher123"))
-                    .role(Role.TEACHER)
-                    .build();
-            userRepository.save(teacher5);
-
-            // 3. Somali Student Accounts
-            User student1 = User.builder()
-                    .username("hamda_farah")
-                    .email("hamda.farah@university.edu.so")
-                    .password(passwordEncoder.encode("student123"))
-                    .role(Role.STUDENT)
-                    .build();
-            userRepository.save(student1);
-
-            User student2 = User.builder()
-                    .username("bilal_warsame")
-                    .email("bilal.warsame@university.edu.so")
-                    .password(passwordEncoder.encode("student123"))
-                    .role(Role.STUDENT)
-                    .build();
-            userRepository.save(student2);
-
-            User student3 = User.builder()
-                    .username("zakaria_aden")
-                    .email("zakaria.aden@university.edu.so")
-                    .password(passwordEncoder.encode("student123"))
-                    .role(Role.STUDENT)
-                    .build();
-            userRepository.save(student3);
-
-            User student4 = User.builder()
-                    .username("hawa_dahir")
-                    .email("hawa.dahir@university.edu.so")
-                    .password(passwordEncoder.encode("student123"))
-                    .role(Role.STUDENT)
-                    .build();
-            userRepository.save(student4);
-
-            User student5 = User.builder()
-                    .username("mustafa_shire")
-                    .email("mustafa.shire@university.edu.so")
-                    .password(passwordEncoder.encode("student123"))
-                    .role(Role.STUDENT)
-                    .build();
-            userRepository.save(student5);
-
-            User student6 = User.builder()
-                    .username("nimo_osman")
-                    .email("nimo.osman@university.edu.so")
-                    .password(passwordEncoder.encode("student123"))
-                    .role(Role.STUDENT)
-                    .build();
-            userRepository.save(student6);
-
-            // 4. University Courses
+        // 4. University Courses Seeding (if courses empty)
+        if (courseRepository.count() == 0) {
             Course course1 = Course.builder()
                     .courseCode("CS-101")
                     .name("Introduction to Computer Science")
@@ -275,10 +217,8 @@ public class DataInitializer implements CommandLineRunner {
                     .title("Extended Campus Library Hours During Finals")
                     .content("The Odros University Library will remain open 24/7 starting next Monday to support students preparing for end-of-term projects and exams.")
                     .targetRole("ALL").priority("NORMAL").category("CAMPUS_LIFE").author(admin1).createdAt(LocalDateTime.now().minusDays(4)).build());
-
-            System.out.println("Extended Somali university demo dataset seeded successfully!");
-        } else {
-            System.out.println("Database already contains data. Skipping initialization.");
         }
+
+        System.out.println("Somali university demo accounts and dataset synchronized successfully!");
     }
 }

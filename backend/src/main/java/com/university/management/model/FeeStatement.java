@@ -52,6 +52,10 @@ public class FeeStatement {
     @Column(nullable = false)
     private Double balance;
 
+    @Column(nullable = true)
+    @Builder.Default
+    private Double pendingPaymentAmount = 0.0;
+
     @NotBlank
     @Column(nullable = false)
     @Builder.Default

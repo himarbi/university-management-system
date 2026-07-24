@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { announcementApi } from '../services/api';
+import ConfirmDialog from './ConfirmDialog';
 import { 
   Bell, 
   Plus, 
@@ -37,6 +38,10 @@ const AnnouncementsWidget = ({ fullPage = false }) => {
   const [priority, setPriority] = useState('NORMAL');
   const [category, setCategory] = useState('GENERAL');
   const [submitting, setSubmitting] = useState(false);
+
+  // Delete confirmation state
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -85,15 +90,20 @@ const AnnouncementsWidget = ({ fullPage = false }) => {
     }
   };
 
-  const handleDeleteAnnouncement = async (id) => {
-    if (!window.confirm('Delete this announcement broadcast?')) return;
+  const confirmDeleteAnnouncement = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await announcementApi.delete(id);
+      await announcementApi.delete(deleteTarget.id);
       setSuccess('Announcement removed.');
+      setDeleteTarget(null);
       fetchAnnouncements();
     } catch (err) {
       console.error(err);
       setError('Failed to delete announcement.');
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -112,6 +122,7 @@ const AnnouncementsWidget = ({ fullPage = false }) => {
   });
 
   return (
+    <>
     <div className="space-y-6 select-none">
       
       {/* Header Bar */}
@@ -131,18 +142,6 @@ const AnnouncementsWidget = ({ fullPage = false }) => {
         )}
       </div>
 
-      {/* Demo & Section Explanation Banner */}
-      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-800 text-xs leading-relaxed space-y-1 shadow-xs">
-        <div className="flex items-center gap-2 font-extrabold text-[#0f224a] text-sm">
-          <Info className="h-4 w-4 text-blue-600" />
-          Feature Demo Guide: Campus Broadcast & Priority Alert Engine
-        </div>
-        <p>
-          Broadcast campus notices across target audiences (ALL, STUDENTS, TEACHERS). 
-          High-priority and <strong>URGENT</strong> alerts feature animated red banners and top pinning. 
-          Use the category dropdown or priority filter to test searching and filtering broadcasts.
-        </p>
-      </div>
 
       {/* Filter Toolbar */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -236,7 +235,7 @@ const AnnouncementsWidget = ({ fullPage = false }) => {
                       </span>
                       {user?.role === 'ADMIN' && (
                         <button
-                          onClick={() => handleDeleteAnnouncement(a.id)}
+                          onClick={() => setDeleteTarget(a)}
                           className="text-rose-600 hover:text-rose-800 p-1"
                           title="Delete Announcement"
                         >
@@ -381,6 +380,21 @@ const AnnouncementsWidget = ({ fullPage = false }) => {
       )}
 
     </div>
+
+    {/* Delete Confirmation Dialog */}
+    <ConfirmDialog
+      open={!!deleteTarget}
+      onClose={() => setDeleteTarget(null)}
+      onConfirm={confirmDeleteAnnouncement}
+      title="Delete Announcement"
+      message="This will permanently remove this announcement from all users' feeds. This action cannot be undone."
+      detail={deleteTarget ? deleteTarget.title : ''}
+      confirmText="Delete Announcement"
+      variant="danger"
+      loading={deleting}
+    />
+
+    </>
   );
 };
 

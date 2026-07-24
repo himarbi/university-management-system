@@ -79,8 +79,15 @@ public class FeeController {
             if (!statement.getStudent().getId().equals(currentUser.getId())) {
                 return ResponseEntity.status(403).body("Error: You can only make payments on your own statement!");
             }
+
+            // Student payments require admin verification
+            statement.setPendingPaymentAmount(payment.getPaymentAmount());
+            statement.setStatus("PENDING_VERIFICATION");
+            FeeStatement saved = feeStatementRepository.save(statement);
+            return ResponseEntity.ok(FeeStatementDto.build(saved));
         }
 
+        // Admin payments apply immediately
         double newPaidAmount = (statement.getPaidAmount() != null ? statement.getPaidAmount() : 0.0) + payment.getPaymentAmount();
         double totalFee = (statement.getTuitionAmount() != null ? statement.getTuitionAmount() : 0.0)
                 + (statement.getLabFee() != null ? statement.getLabFee() : 0.0)
@@ -98,6 +105,43 @@ public class FeeController {
 
         FeeStatement saved = feeStatementRepository.save(statement);
         return ResponseEntity.ok(FeeStatementDto.build(saved));
+    }
+
+    @PostMapping("/{id}/verify")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> verifyPayment(@PathVariable Long id, @RequestParam boolean approve) {
+        return feeStatementRepository.findById(id).map(statement -> {
+            if (!"PENDING_VERIFICATION".equalsIgnoreCase(statement.getStatus())) {
+                return ResponseEntity.badRequest().body("Error: No pending payment on this statement to verify!");
+            }
+
+            double pendingAmount = statement.getPendingPaymentAmount() != null ? statement.getPendingPaymentAmount() : 0.0;
+
+            if (approve) {
+                double newPaidAmount = (statement.getPaidAmount() != null ? statement.getPaidAmount() : 0.0) + pendingAmount;
+                double totalFee = (statement.getTuitionAmount() != null ? statement.getTuitionAmount() : 0.0)
+                        + (statement.getLabFee() != null ? statement.getLabFee() : 0.0)
+                        + (statement.getRegistrationFee() != null ? statement.getRegistrationFee() : 0.0);
+
+                double newBalance = Math.max(0.0, totalFee - newPaidAmount);
+                statement.setPaidAmount(newPaidAmount);
+                statement.setBalance(newBalance);
+                statement.setPendingPaymentAmount(0.0);
+
+                if (newBalance <= 0) {
+                    statement.setStatus("PAID");
+                } else {
+                    statement.setStatus("PENDING");
+                }
+            } else {
+                // Rejected: reset pending payment, revert status to PENDING
+                statement.setPendingPaymentAmount(0.0);
+                statement.setStatus("PENDING");
+            }
+
+            FeeStatement saved = feeStatementRepository.save(statement);
+            return ResponseEntity.ok(FeeStatementDto.build(saved));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/generate")

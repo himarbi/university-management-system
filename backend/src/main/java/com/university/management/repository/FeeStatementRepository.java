@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface FeeStatementRepository extends JpaRepository<FeeStatement, Long> {
     List<FeeStatement> findByStudentId(Long studentId);
     Optional<FeeStatement> findByStudentIdAndAcademicTerm(Long studentId, String academicTerm);
+    void deleteByStudentId(Long studentId);
 }

@@ -46,7 +46,7 @@ public class CourseDto {
 
     private UserDto teacher;
     private Set<UserDto> students;
-    private int studentCount;
+    private Integer studentCount;
 
     public static CourseDto build(Course course) {
         if (course == null) return null;

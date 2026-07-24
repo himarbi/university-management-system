@@ -13,6 +13,7 @@ public class UserDto {
     private String username;
     private String email;
     private String role;
+    private String department;
 
     public static UserDto build(User user) {
         if (user == null) return null;
@@ -21,6 +22,7 @@ public class UserDto {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .department(user.getDepartment())
                 .build();
     }
 }

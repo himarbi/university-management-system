@@ -38,16 +38,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (username, email, password, role) => {
-    try {
-      await api.post('/auth/register', { username, email, password, role });
-      return { success: true };
-    } catch (error) {
-      console.error('Registration failed:', error);
-      return { success: false, error: parseErrorMessage(error, 'Registration failed') };
-    }
-  };
-
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -60,10 +50,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, hasRole }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, hasRole }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
+
